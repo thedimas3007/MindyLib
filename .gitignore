@@ -1,0 +1,5 @@
+preview.png
+*.msch
+sprites
+__pycache__
+.idea
