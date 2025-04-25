@@ -6,6 +6,8 @@ from PIL import Image
 from struct import unpack
 from typing import Literal
 
+from content.items import get_item_by_code
+from content.liquids import get_liquid_by_code
 from point2 import Point2
 
 f = open("test-sch.msch", "rb")
@@ -33,7 +35,15 @@ def read_obj(stream: BytesIO) -> object:
     elif obj_type ==  2: return read_num(stream, 8) # long
     elif obj_type ==  3: return read_float(stream, 4) # float
     elif obj_type ==  4: return read_utf(stream) # string
-    elif obj_type ==  5: return f"Content[{read_num(stream, 1)}, {read_num(stream, 2)}]" # content; TODO
+    elif obj_type ==  5:
+        cont_type = read_num(stream, 1)
+        sub_id = read_num(stream, 2)
+        if cont_type == 0:
+            return get_item_by_code(sub_id)
+        elif cont_type == 4:
+            return get_liquid_by_code(sub_id)
+        else:
+            return f"Content[{cont_type}, {sub_id}]"
     elif obj_type ==  6: # int[]
         arr_len = read_num(stream, 2)
         return [read_num(stream, 4) for _ in range(arr_len)]
