@@ -7,7 +7,7 @@ from struct import unpack
 
 from content.items import get_item_by_code
 from content.liquids import get_liquid_by_code
-from types import Point2
+from g_types import Point2
 
 f = open("test-sch.msch", "rb")
 

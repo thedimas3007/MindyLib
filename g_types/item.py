@@ -6,6 +6,12 @@ class Item:
         self.name = name
         self.color = color
 
+    def __hash__(self):
+            return hash(self.id)
+
+    def __eq__(self, other):
+        return self.id == other.id
+
     def __str__(self):
         return f"Item(id=\"{self.id}\", name=\"{self.name}\", color=0x{self.color:06X})"
 
