@@ -31,7 +31,7 @@ class Point2:
         return Point2.pack(self.x, self.y)
 
     def __str__(self):
-        return f"({self.x}; {self.y})"
+        return f"Point2({self.x}, {self.y})"
 
     def __repr__(self):
-        return f"Point2({self.x}, {self.y})"
+        return self.__str__()

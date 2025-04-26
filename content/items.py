@@ -1,17 +1,7 @@
 from typing import Optional
 
-from utils import space_to_kebab
+from types import Item
 
-class Item:
-    def __init__(self, name: str, color: int):
-        self.id = space_to_kebab(name)
-        self.name = name
-        self.color = color
-
-    def __repr__(self):
-        return f"Item(id=\"{self.id}\", name=\"{self.name}\", color=0x{self.color:06X})"
-
-# Defining items
 copper = Item("Copper", 0xd99d73)
 lead = Item("Lead", 0x8c7fa9)
 metaglass = Item("Metaglass", 0xebeef5)

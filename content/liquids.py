@@ -1,17 +1,7 @@
 from typing import Optional
 
-from utils import space_to_kebab
+from types import Liquid
 
-class Liquid:
-    def __init__(self, name, color):
-        self.id = space_to_kebab(name)
-        self.name = name
-        self.color = color
-
-    def __repr__(self):
-        return f"Liquid(id=\"{self.id}\", name=\"{self.name}\", color=0x{self.color:06X})"
-
-# Defining liquids
 water = Liquid("Water", 0x596ab8)
 slag = Liquid("Slag", 0xffa166)
 oil = Liquid("Oil", 0x313131)
