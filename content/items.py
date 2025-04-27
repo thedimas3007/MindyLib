@@ -1,6 +1,6 @@
 from typing import Optional
 
-from g_types import Item
+from g_types.item import Item
 
 copper = Item("Copper", 0xd99d73)
 lead = Item("Lead", 0x8c7fa9)

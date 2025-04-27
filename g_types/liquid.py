@@ -1,4 +1,4 @@
-from utils import space_to_kebab
+from string_utils import space_to_kebab
 
 class Liquid:
     def __init__(self, name, color):

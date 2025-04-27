@@ -1,6 +1,6 @@
 from typing import Optional
 
-from g_types import Liquid
+from g_types.liquid import Liquid
 
 water = Liquid("Water", 0x596ab8)
 slag = Liquid("Slag", 0xffa166)

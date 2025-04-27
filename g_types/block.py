@@ -1,5 +1,5 @@
-from g_types import BlockOutput, BlockOutputDirection
-from utils import space_to_kebab
+from .block_output import BlockOutput, BlockOutputDirection
+from string_utils import space_to_kebab
 
 class Block:
     def __init__(self, name: str, category: str, size: int, output: BlockOutput = BlockOutput.NONE, output_direction: BlockOutputDirection = BlockOutputDirection.NONE, power_consumption: int = 0):

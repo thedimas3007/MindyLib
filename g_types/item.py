@@ -1,4 +1,4 @@
-from utils import space_to_kebab
+from string_utils import space_to_kebab
 
 class Item:
     def __init__(self, name: str, color: int):
