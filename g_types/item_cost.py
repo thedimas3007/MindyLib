@@ -1,5 +1,5 @@
 from content.items import all_items
-from . import Item
+from .item import Item
 
 from content import items
 

@@ -1,11 +1,15 @@
 import json
 import zlib
 from io import BytesIO
-from typing import IO
+from os import PathLike
+from typing import IO, BinaryIO
 
 from PIL import Image
 
-from g_types import Tile, Point2, Block, TileRotation
+from .tile import Tile
+from .point2 import Point2
+from .block import Block
+from .tile import TileRotation
 from utils import read_num, JavaTypes, read_utf, read_obj
 
 
@@ -76,7 +80,9 @@ class Schematic: # Read only for now
 
 
     @staticmethod
-    def from_file(file: IO) -> "Schematic":
+    def from_file(file: str | PathLike | BinaryIO) -> "Schematic":
+        if isinstance(file, PathLike) or isinstance(file, str):
+            file = open(file, "rb")
         if file.read(4) != b"msch":
             raise Exception("Not a schematics file")
         ver = read_num(file, JavaTypes.BYTE)

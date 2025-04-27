@@ -1,6 +1,7 @@
 from enum import Flag, auto
 
-from g_types import Point2, Block
+from .point2 import Point2
+from .block import Block
 
 class TileRotation(Flag):
     RIGHT = 0
