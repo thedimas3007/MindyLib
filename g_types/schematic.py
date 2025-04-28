@@ -78,6 +78,30 @@ class Schematic: # Read only for now
             preview.paste(block_img, (x_pos, flipped_y))
         preview.save(filename)
 
+    def render_canvases(self) -> None:
+        # Used Java code from Mindustry sources to decode canvas config
+        bpp = 3
+        pixels = 12*12
+
+        def get_byte(arr, offset):
+            result = 0
+            for i in range(bpp):
+                word = i + offset >> 3
+                result |= ((0 if (arr[word] & (1 << (i + offset & 7))) == 0 else 1) << i)
+            return result
+
+        colors = [0x362944, 0xc45d9f, 0xe39aac, 0xf0dab1, 0x6461c2, 0x2ba9b4, 0x93d4b5, 0xf0f6e8]
+        n_canvas = 0
+        for tile in self._tiles:
+            if tile.block.id == "canvas":
+                img = Image.new("RGB", (12, 12), (0, 0, 0))
+                for i in range(pixels):
+                    offset = i * bpp
+                    index = get_byte(tile.config, offset)
+                    color = colors[index]
+                    img.putpixel((i % 12, i // 12), (color >> 16, (color >> 8) & 0xFF, color & 0xFF)) # hex is BGR whilst PIL uses RGB
+                img.save(f"canvas-{n_canvas}.png")
+                n_canvas += 1
 
     @staticmethod
     def from_file(file: str | PathLike | BinaryIO) -> "Schematic":
