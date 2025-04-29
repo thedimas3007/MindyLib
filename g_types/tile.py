@@ -36,7 +36,7 @@ class Tile:
         return self.pos.y
 
     def __str__(self):
-        return f"Tile({self.pos}, \"{self.block.name}\", {self.rot}, {self.config})"
+        return f"Tile({self.pos}, \"{self.block.name}\", {self.rot}, {repr(self.config)})"
 
     def __repr__(self):
         return self.__str__()

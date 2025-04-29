@@ -30,6 +30,11 @@ class ItemCost:
             raise ValueError("value must be >= 0")
         self._cost[key] = value
 
+    def __mul__(self, other):
+        if not isinstance(other, int):
+            raise TypeError("other must be of type int")
+        return ItemCost({k: v * other for k, v in self._cost.items()})
+
     def __iter__(self):
         return iter(self._cost.items())
 

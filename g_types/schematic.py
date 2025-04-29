@@ -1,5 +1,6 @@
 import json
 import zlib
+from base64 import b64decode
 from io import BytesIO
 from os import PathLike
 from typing import IO, BinaryIO
@@ -142,7 +143,7 @@ class Schematic: # Read only for now
 
     @staticmethod
     def from_b64(b64: str) -> "Schematic":
-        return Schematic.from_file(BytesIO(bytes(b64, "utf-8")))
+        return Schematic.from_file(BytesIO(b64decode(bytes(b64, "utf-8"))))
 
 if __name__ == "__main__":
     from rich import inspect
