@@ -31,5 +31,11 @@ class Block:
         self.power_consumption = power_consumption
 
     @property
-    def energy_usage(self) -> int:
+    def energy_usage(self) -> float:
         return self.power_consumption * 60
+
+    def __str__(self):
+        return f"Block(\"{self.name}\", \"{self.category}\", {self.size}, {self.cost}, {self.output}, {self.output_direction}, {self.power_consumption})"
+
+    def __repr__(self):
+        return self.__str__()

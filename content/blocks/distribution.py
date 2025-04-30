@@ -1,4 +1,5 @@
 from g_types.block import Block, BlockOutput, BlockOutputDirection
+from .block_types import TransportBlock
 from .. import items
 
 distribution = "distribution"
@@ -6,11 +7,6 @@ duct_category = f"{distribution}/ducts"
 conveyor_category = f"{distribution}/conveyors"
 stack_category = f"{distribution}/stack-conveyors"
 unit_category = "units"
-
-class TransportBlock(Block):
-    def __init__(self, name, category, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):
-        super().__init__(name, category, size, cost, output, output_direction, power_consumption)
-
 
 conveyor = TransportBlock("Conveyor", conveyor_category, 1, {
     items.copper: 1
@@ -143,7 +139,7 @@ unit_cargo_unload_point = Block("Unit Cargo Unload Point", unit_category, 2, {
     items.tungsten: 60
 }, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL)
 
-distribution_blocks = [
+all_blocks = [
     conveyor, titanium_conveyor, plastanium_conveyor, armored_conveyor,
     junction, item_bridge, phase_conveyor, sorter, inverted_sorter, router,
     distributor, overflow_gate, underflow_gate, mass_driver, duct, armored_duct,

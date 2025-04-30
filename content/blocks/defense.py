@@ -1,17 +1,9 @@
 from g_types.block import Block, BlockOutput, BlockOutputDirection
+from .block_types import Wall
 from .. import items
 
 defense_category = "defense"
 wall_category = "walls"
-
-class DefenseBlock(Block):
-    def __init__(self, name, size, cost, output=BlockOutput.NONE, output_direction=BlockOutputDirection.NONE, power_consumption=0.0, category=defense_category):
-        super().__init__(name, category, size, cost, output, output_direction, power_consumption)
-
-class Wall(DefenseBlock):
-    def __init__(self, name, size, cost, output=BlockOutput.NONE, output_direction=BlockOutputDirection.NONE, power_consumption=0.0):
-        super().__init__(name, size, cost, output, output_direction, power_consumption, wall_category)
-
 
 copper_wall = Wall("Copper Wall", 1, {
     items.copper: 6
@@ -107,7 +99,7 @@ shielded_wall = Wall("Shielded Wall", 2, {
     items.surge_alloy: 12
 }, power_consumption=3/60)
 
-defense_blocks = [
+all_blocks = [
     copper_wall, copper_wall_large, titanium_wall, titanium_wall_large,
     plastanium_wall, plastanium_wall_large, thorium_wall, thorium_wall_large,
     phase_wall, phase_wall_large, surge_wall, surge_wall_large,

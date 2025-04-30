@@ -1,12 +1,9 @@
 from g_types.block import Block, BlockOutput, BlockOutputDirection
+from .block_types import Pump
 from .. import items
 
 category = "liquid"
 conduit_category = f"{category}/conduits"
-
-class Pump(Block):
-    def __init__(self, name, size, cost, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):
-        super().__init__(name, category, size, cost, output, output_direction, power_consumption)
 
 mechanical_pump = Pump("Mechanical Pump", 1, {
     items.copper: 15,
@@ -110,7 +107,7 @@ reinforced_liquid_tank = Block("Reinforced Liquid Tank", category, 3, {
     items.beryllium: 50
 }, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL)
 
-liquid_blocks = [
+all_blocks = [
     mechanical_pump, rotary_pump, impulse_pump, reinforced_pump,
     conduit, pulse_conduit, plated_conduit,
     liquid_router, liquid_container, liquid_tank, liquid_junction,

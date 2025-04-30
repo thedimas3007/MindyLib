@@ -1,4 +1,4 @@
-from .defense import DefenseBlock
+from .block_types import DefenseBlock
 from .. import items
 
 category = "defense" # All blocks used are defense ones
@@ -19,6 +19,6 @@ shield_projector = DefenseBlock("Shield Projector", 3, {}, power_consumption=5)
 
 large_shield_projector = DefenseBlock("Large Shield Projector", 4, {}, power_consumption=5)
 
-experiment_blocks = [
+all_blocks = [
     barrier_projector, shockwave_tower, shield_projector, large_shield_projector
 ]

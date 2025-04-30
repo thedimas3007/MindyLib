@@ -1,12 +1,9 @@
 from g_types.block import Block, BlockOutput, BlockOutputDirection
+from .block_types import Drill
 from .. import items
 
 drill_category = "drills"
 prod_category = "production"
-
-class Drill(Block):
-    def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):
-        super().__init__(name, drill_category, size, cost, output, output_direction, power_consumption)
 
 mechanical_drill = Drill("Mechanical Drill", 2, {
     items.copper: 12
@@ -85,7 +82,7 @@ eruption_drill = Drill("Eruption Drill", 5, {
     items.thorium: 120
 }, power_consumption=6)
 
-production_blocks = [
+all_blocks = [
     mechanical_drill, pneumatic_drill, laser_drill, blast_drill,
     water_extractor, oil_extractor,
     plasma_bore, large_plasma_bore, impact_drill, eruption_drill,

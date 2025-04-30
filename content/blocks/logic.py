@@ -1,11 +1,8 @@
 from g_types.block import Block, BlockOutput, BlockOutputDirection
+from .block_types import LogicBlock
 from .. import items
 
 category = "logic"
-
-class LogicBlock(Block):
-    def __init__(self, name, size, cost, output=BlockOutput.NONE, output_direction=BlockOutputDirection.NONE, power_consumption=0.0):
-        super().__init__(name, category, size, cost, output, output_direction, power_consumption)
 
 message = LogicBlock("Message", 1, {
     items.graphite: 5
@@ -74,7 +71,7 @@ world_cell = LogicBlock("World Cell", 1, {})
 
 world_message = LogicBlock("World Message", 1, {})
 
-logic_blocks = [
+all_blocks = [
     message, switch, micro_processor, logic_processor, hyper_processor,
     memory_cell, memory_bank, logic_display, large_logic_display, canvas,
     reinforced_message, world_processor, world_cell, world_message

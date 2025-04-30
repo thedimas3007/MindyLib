@@ -1,11 +1,8 @@
 from g_types.block import Block, BlockOutput, BlockOutputDirection
+from .block_types import Pad
 from .. import items
 
 category = "campaign"
-
-class Pad(Block):
-    def __init__(self, name, size, cost, power_consumption=0.0):
-        super().__init__(name, category, size, cost, power_consumption=power_consumption)
 
 launch_pad = Pad("Launch Pad",  3, {
     items.copper: 350,
@@ -23,4 +20,4 @@ interplanetary_accelerator = Block("Interplanetary Accelerator",  category, 7, {
     items.phase_fabric: 5000
 }, power_consumption=10.0)
 
-campaign_blocks = [launch_pad, interplanetary_accelerator]
+all_blocks = [launch_pad, interplanetary_accelerator]

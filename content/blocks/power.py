@@ -1,18 +1,10 @@
 from g_types.block import Block, BlockOutput, BlockOutputDirection
+from .block_types import PowerBlock, PowerGenerator
 from .. import items
 
 category = "power"
 
 # TODO: battery type for Capacity field
-
-class PowerBlock(Block):
-    def __init__(self, name, size, cost, output=BlockOutput.NONE, output_direction=BlockOutputDirection.NONE, power_consumption=0.0):
-        super().__init__(name, category, size, cost, output, output_direction, power_consumption)
-
-class PowerGenerator(PowerBlock):
-    def __init__(self, name, size, cost, output=BlockOutput.NONE, output_direction=BlockOutputDirection.NONE, power_consumption=0.0, power_generation=0.0):
-        super().__init__(name, size, cost, output, output_direction, power_consumption)
-        self.power_generation = power_generation
 
 power_node = PowerBlock("Power Node", 1, {
     items.copper: 1,
@@ -167,7 +159,7 @@ neoplasia_reactor = PowerGenerator("Neoplasia Reactor", 5, {
     items.surge_alloy: 200
 }, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.FRONT, power_generation=140)
 
-power_blocks = [
+all_blocks = [
     power_node, power_node_large, surge_tower, diode,
     battery, battery_large, combustion_generator, thermal_generator,
     steam_generator, differential_generator, rtg_generator, solar_panel,

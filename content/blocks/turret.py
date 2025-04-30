@@ -1,12 +1,9 @@
 from g_types.block import Block, BlockOutput, BlockOutputDirection
+from .block_types import Turret
 from .. import items
 
 category = "turrets"
 defense_category = "defense"
-
-class Turret(Block):
-    def __init__(self, name, size, cost, output=BlockOutput.NONE, output_direction=BlockOutputDirection.NONE, power_consumption=0.0, reinforced=False):
-        super().__init__(name, category, size, cost, output, output_direction, power_consumption)
 
 duo = Turret("Duo", 1, {
     items.copper: 35,
@@ -187,7 +184,7 @@ malign = Turret("Malign", 5, {
     items.phase_fabric: 300,
 }, power_consumption=5, reinforced=True)
 
-turret_blocks = [
+all_blocks = [
     duo, scatter, scorch, hail, wave, lancer, arc, parallax, swarmer, salvo,
     segment, tsunami, fuse, ripple, cyclone, foreshadow, spectre, meltdown,
     breach, diffuse, sublimate, titan, disperse, afflict, lustre, scathe,

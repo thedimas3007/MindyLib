@@ -1,11 +1,8 @@
 from g_types.block import Block, BlockOutput, BlockOutputDirection
-from .campaign import category
-from .defense import DefenseBlock
+from .block_types import DefenseBlock, StorageBlock
 from .. import items
 
-class StorageBlock(Block):
-    def __init__(self, name, size, cost, output=BlockOutput.NONE, output_direction=BlockOutputDirection.NONE, power_consumption=0):
-        super().__init__(name, category, size, cost, output, output_direction, power_consumption)
+category = "storage"
 
 mender = DefenseBlock("Mender", 1, {
     items.lead: 30,
@@ -133,7 +130,7 @@ reinforced_vault = StorageBlock("Reinforced Vault", 3, {
     items.beryllium: 100
 })
 
-core_blocks = [
+all_blocks = [
     mender, mend_projector, overdrive_projector, overdrive_dome,
     force_projector, shock_mine, radar, build_tower, regen_projector,
     core_shard, core_foundation, core_nucleus,

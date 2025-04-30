@@ -1,17 +1,10 @@
 from g_types.block import Block, BlockOutput, BlockOutputDirection
+from .block_types import Factory, PayloadBlock
 from .sandbox import payload_void
 from .. import items
 
 unit_category = "unit"
 payload_category = "payload"
-
-class PayloadBlock(Block):
-    def __init__(self, name, size, cost, output=BlockOutput.NONE, output_direction=BlockOutputDirection.NONE, power_consumption=0.0):
-        super().__init__(name, payload_category, size, cost, output, output_direction, power_consumption)
-
-class Factory(Block):
-    def __init__(self, name, size, cost, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, power_consumption=0.0):
-        super().__init__(name, payload_category, size, cost, output, output_direction, power_consumption)
 
 command_center = Block("Command Center", unit_category, 2, {
     items.copper: 200,
@@ -232,7 +225,7 @@ payload_unloader = PayloadBlock("Payload Unloader", 3, {
     items.tungsten: 30
 }, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=2)
 
-payload_blocks = [
+all_blocks = [
     command_center,
     ground_factory, air_factory, naval_factory,
     additive_reconstructor, multiplicative_reconstructor, exponential_reconstructor, tetrative_reconstructor,

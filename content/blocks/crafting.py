@@ -1,11 +1,8 @@
 from g_types.block import Block, BlockOutput, BlockOutputDirection
+from .block_types import GenericCrafter
 from .. import items
 
 category = "production"
-
-class GenericCrafter(Block):
-    def __init__(self, name, size, cost, output=BlockOutput.NONE, output_direction=BlockOutputDirection.NONE, power_consumption=0):
-        super().__init__(name, category, size, cost, output, output_direction, power_consumption)
 
 graphite_press = GenericCrafter("Graphite Press", 2, {
     items.copper: 75,
@@ -207,7 +204,7 @@ heat_reactor = GenericCrafter("Heat Reactor", 3, {
     items.thorium: 80
 })
 
-crafting_blocks = [
+all_blocks = [
     graphite_press, multi_press, silicon_smelter, silicon_crucible, kiln,
     plastanium_compressor, phase_weaver, surge_smelter, cryofluid_mixer,
     pyratite_mixer, blast_mixer, melter, separator, disassembler, spore_press,
