@@ -37,8 +37,8 @@ erekir_items = [
 
 all_items = serpulo_items + [i for i in erekir_items if i not in serpulo_items]
 
-def get_item(name: str) -> Optional[Item]:
-    return next((i for i in all_items if i.name == name), None)
+def get_item(id: str) -> Optional[Item]:
+    return next((i for i in all_items if i.id == id), None)
 
 def get_item_by_code(code: int) -> Optional[Item]:
     return all_items[code] if code < len(all_items) else None

@@ -9,7 +9,7 @@ class ItemCost:
                       for k in all_items}
 
     @property
-    def cost(self):
+    def __dict__(self):
         return self._cost.copy()
 
     def __getitem__(self, key: Item):
@@ -29,6 +29,11 @@ class ItemCost:
         if value < 0:
             raise ValueError("value must be >= 0")
         self._cost[key] = value
+
+    def __add__(self, other):
+        if not isinstance(other, ItemCost):
+            raise TypeError("other must be of type ItemCost")
+        return ItemCost({k: self[k] + other[k] for k in all_items})
 
     def __mul__(self, other):
         if not isinstance(other, int):

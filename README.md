@@ -6,9 +6,8 @@ Python-based parser for Mindustry schematics and maps. WIP
 
 * **Code**
   * [x] Implement game types
-  * [ ] Copy game blocks
+  * [x] Copy game blocks
     * [ ] Verify blocks afterward
-    * [ ] Move DefenseBlock into turrets
     * [ ] Classes for common blocks in `blocks`
       * Conveyors, routers, pipes, etc.
       * Will implement same rendering logic
@@ -26,7 +25,7 @@ Python-based parser for Mindustry schematics and maps. WIP
   * [ ] Improved preview generation
     * I mean, dynamic conveyors, colored sorters, etc
     * Maybe show those canvases rendered
-  * [ ] More information about schematics
+  * [x] More information about schematics
 
 * Maps
   * *Eventually*

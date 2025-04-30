@@ -18,8 +18,8 @@ all_liquids = [
     water, slag, oil, cryofluid, neoplasm, arkycite, gallium, ozone, hydrogen, nitrogen, cyanogen
 ]
 
-def get_liquid(name: str) -> Optional[Liquid]:
-    return next((i for i in all_liquids if i.name == name), None)
+def get_liquid(id: str) -> Optional[Liquid]:
+    return next((i for i in all_liquids if i.id == id), None)
 
 def get_liquid_by_code(code: int) -> Optional[Liquid]:
     return all_liquids[code] if code < len(all_liquids) else None

@@ -1,17 +1,21 @@
 import json
 import zlib
 from base64 import b64decode
+from functools import reduce
 from io import BytesIO
 from os import PathLike
 from typing import IO, BinaryIO
 
 from PIL import Image
 
+from content.blocks import get_block
+from content.blocks.block_types import PowerGenerator
+from g_types.item_cost import ItemCost
 from .tile import Tile
 from .point2 import Point2
 from .block import Block
 from .tile import TileRotation
-from utils import read_num, JavaTypes, read_utf, read_obj
+from utils import JavaTypes, read_num, read_utf, read_obj
 
 
 class Schematic: # Read only for now
@@ -61,6 +65,22 @@ class Schematic: # Read only for now
     @property
     def tiles(self) -> list[Tile]:
         return self._tiles.copy()
+
+    @property
+    def power_consumption(self) -> int:
+        return round(sum(tile.block.power_consumption * 60 for tile in self._tiles))
+
+    @property
+    def power_generation(self) -> int:
+        return round(sum(tile.block.power_generation * 60 for tile in self._tiles if isinstance(tile.block, PowerGenerator)))
+
+    @property
+    def power_balance(self) -> int:
+        return self.power_generation - self.power_consumption
+
+    @property
+    def cost(self) -> ItemCost:
+        return reduce(lambda a, b: a + b, (tile.block.cost for tile in self._tiles))
 
     def save_preview(self, filename: str = "preview.png") -> None:
         preview = Image.new("RGBA", (self.width*32, self.height*32), (0, 0, 0, 0))
@@ -126,9 +146,10 @@ class Schematic: # Read only for now
         blocks = []
         for _ in range(blocks_used):
             name = read_utf(decom)
-            blocks.append(name)
-
-        game_blocks = {name: Block(name, "", 1) for name in blocks} # TODO: replace with actual blocks
+            block = get_block(name)
+            if block is None:
+                raise Exception(f"Unknown block {name}")
+            blocks.append(block)
 
         total_blocks = read_num(decom, JavaTypes.INT)
         tiles: list[Tile] = []
@@ -137,17 +158,27 @@ class Schematic: # Read only for now
             point = Point2.unpack(read_num(decom, JavaTypes.INT))
             cfg = read_obj(decom)
             rot = read_num(decom, JavaTypes.BYTE) % 4
-            tiles.append(Tile(point, game_blocks[blocks[index]], TileRotation.from_int(rot), cfg))
-
+            tiles.append(Tile(point, blocks[index], TileRotation.from_int(rot), cfg))
+        file.close()
         return Schematic(ver, width, height, tags, tiles)
 
     @staticmethod
     def from_b64(b64: str) -> "Schematic":
         return Schematic.from_file(BytesIO(b64decode(bytes(b64, "utf-8"))))
 
+
 if __name__ == "__main__":
-    from rich import inspect
-    f = open("test.msch", "rb")
+    from rich import print
+    print("== Fancy Schematic Parser ==")
+    print("Loading [yellow]test.msch[/]")
+    f = open("samples/test.msch", "rb")
     s = Schematic.from_file(f)
-    s.save_preview()
-    inspect(s)
+    print("-- Schematic info --")
+    print(f"Size: [yellow]{s.width}x{s.height}[/]")
+    print(f"Name: [yellow]{s.name.strip()}[/]")
+    if s.description != "":
+        print(f"Description: [yellow]{s.description}[/]")
+    print(f"Items:")
+    for i,a in {i: a for i,a in s.cost if a > 0}.items():
+        print(f"  {i.name}: [yellow]{a}[/]")
+    print(f"Power: [{'green' if s.power_balance >= 0 else 'red'}]{s.power_balance}[/]")
