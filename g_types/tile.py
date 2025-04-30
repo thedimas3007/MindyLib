@@ -40,3 +40,16 @@ class Tile:
 
     def __repr__(self):
         return self.__str__()
+
+class GhostTile(Tile):
+    """
+    Represents a tile that is part of a multi-tile (2x2 or larger) block structure.
+    Used to simplify neighbor detection.
+    Not rendered. Only for internal use!
+    """
+    def __str__(self):
+        return f"GhostTile({self.pos}, \"{self.block.name}\", {self.rot}, {repr(self.config)})"
+
+    def __repr__(self):
+        return self.__str__()
+

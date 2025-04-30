@@ -3,15 +3,16 @@ import zlib
 from base64 import b64decode
 from functools import reduce
 from io import BytesIO
+from math import floor, ceil
 from os import PathLike
-from typing import IO, BinaryIO
+from typing import IO, BinaryIO, Optional
 
 from PIL import Image
 
 from content.blocks import get_block
 from content.blocks.block_types import PowerGenerator
 from g_types.item_cost import ItemCost
-from .tile import Tile
+from .tile import Tile, GhostTile
 from .point2 import Point2
 from .block import Block
 from .tile import TileRotation
@@ -19,7 +20,7 @@ from utils import JavaTypes, read_num, read_utf, read_obj
 
 
 class Schematic: # Read only for now
-    def __init__(self, version: int, width: int, height: int, tags: dict[str, str], tiles: list[Tile]):
+    def __init__(self, version: int, width: int, height: int, tags: dict[str, str], tiles: list[Tile | GhostTile]):
         # Maybe should add raw base64 here and/or decompressed data
         assert width > 0 and height > 0
         assert width <= 128 and height <= 128
@@ -63,7 +64,7 @@ class Schematic: # Read only for now
             return []
 
     @property
-    def tiles(self) -> list[Tile]:
+    def tiles(self) -> list[Tile | GhostTile]:
         return self._tiles.copy()
 
     @property
@@ -82,9 +83,23 @@ class Schematic: # Read only for now
     def cost(self) -> ItemCost:
         return reduce(lambda a, b: a + b, (tile.block.cost for tile in self._tiles))
 
+    def __getitem__(self, item: Point2 | tuple[int, int]) -> Optional[Tile | GhostTile]:
+        if not (isinstance(item, Point2) or isinstance(item, tuple)):
+            raise TypeError("item must be of type Point2 or tuple[int, int]")
+        if isinstance(item, tuple):
+            item = Point2(*item)
+        if item.x < 0 or item.y < 0:
+            raise ValueError("item.x and item.y must be >= 0")
+        if item.x >= self.width or item.y >= self.height:
+            raise ValueError("item.x and item.y must be < width and height respectively")
+
+        return next((tile for tile in self._tiles if tile.pos == item), None)
+
     def save_preview(self, filename: str = "preview.png") -> None:
         preview = Image.new("RGBA", (self.width*32, self.height*32), (0, 0, 0, 0))
         for tile in self._tiles:
+            if isinstance(tile, GhostTile):
+                continue
             block_img = Image.open(f"sprites/block-{tile.block.id}-ui.png")
             block_img = block_img.rotate(tile.rot.value * 90)
             tile_width = block_img.width // 32
@@ -124,6 +139,23 @@ class Schematic: # Read only for now
                 img.save(f"canvas-{n_canvas}.png")
                 n_canvas += 1
 
+    def render_debug(self) -> None:
+        """
+        Used for rendering debug images of GhostTiles.
+        For internal use.
+        """
+        img = Image.new("RGB", (self.width, self.height), (0, 0, 0))
+        print(f"Size: {self.width}x{self.height}")
+        for tile in self._tiles:
+            print(tile)
+            if len(list(filter(lambda t: t.x == tile.x and t.y == tile.y, self._tiles))) > 1: # intersection
+                img.putpixel((tile.x, self.height - tile.y - 1), (0, 128, 255))
+            elif isinstance(tile, GhostTile):
+                img.putpixel((tile.x, self.height - tile.y - 1), (255, 0, 0))
+            else:
+                img.putpixel((tile.x, self.height - tile.y - 1), (0, 255, 0))
+        img.save("debug.png")
+
     @staticmethod
     def from_file(file: str | PathLike | BinaryIO) -> "Schematic":
         if isinstance(file, PathLike) or isinstance(file, str):
@@ -158,7 +190,19 @@ class Schematic: # Read only for now
             point = Point2.unpack(read_num(decom, JavaTypes.INT))
             cfg = read_obj(decom)
             rot = read_num(decom, JavaTypes.BYTE) % 4
-            tiles.append(Tile(point, blocks[index], TileRotation.from_int(rot), cfg))
+            rot_obj = TileRotation.from_int(rot)
+            block = blocks[index]
+            tiles.append(Tile(point, block, rot_obj, cfg))
+
+            if block.size > 1:
+                lower = -floor(block.size/2) + (1-block.size%2)
+                upper = floor(block.size/2)
+                for y in range(lower, upper + 1):
+                    for x in range(lower, upper + 1):
+                        if x == 0 and y == 0:
+                            continue
+                        new_point = Point2(point.x + x, point.y + y)
+                        tiles.append(GhostTile(new_point, block, rot_obj, cfg))
         file.close()
         return Schematic(ver, width, height, tags, tiles)
 
@@ -171,14 +215,16 @@ if __name__ == "__main__":
     from rich import print
     print("== Fancy Schematic Parser ==")
     print("Loading [yellow]test.msch[/]")
-    f = open("samples/test.msch", "rb")
+    f = open("samples/turrets.msch", "rb")
     s = Schematic.from_file(f)
-    print("-- Schematic info --")
-    print(f"Size: [yellow]{s.width}x{s.height}[/]")
-    print(f"Name: [yellow]{s.name.strip()}[/]")
-    if s.description != "":
-        print(f"Description: [yellow]{s.description}[/]")
-    print(f"Items:")
-    for i,a in {i: a for i,a in s.cost if a > 0}.items():
-        print(f"  {i.name}: [yellow]{a}[/]")
-    print(f"Power: [{'green' if s.power_balance >= 0 else 'red'}]{s.power_balance}[/]")
+    # s.save_preview()
+    # s.render_debug()
+    # print("-- Schematic info --")
+    # print(f"Size: [yellow]{s.width}x{s.height}[/]")
+    # print(f"Name: [yellow]{s.name.strip()}[/]")
+    # if s.description != "":
+    #     print(f"Description: [yellow]{s.description}[/]")
+    # print(f"Items:")
+    # for i,a in {i: a for i,a in s.cost if a > 0}.items():
+    #     print(f"  {i.name}: [yellow]{a}[/]")
+    # print(f"Power: [{'green' if s.power_balance >= 0 else 'red'}]{s.power_balance}[/]")
