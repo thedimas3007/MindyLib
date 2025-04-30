@@ -1,4 +1,4 @@
-from enum import Flag, auto
+from enum import Flag, Enum, auto
 
 from .point2 import Point2
 from .block import Block
@@ -19,6 +19,23 @@ class TileRotation(Flag):
             return TileRotation.LEFT
         elif i == 3:
             return TileRotation.BOTTOM
+
+class Direction(Enum):
+    TOP = (0, -1)
+    BOTTOM = (0, 1)
+    LEFT = (-1, 0)
+    RIGHT = (1, 0)
+
+    @property
+    def offset(self) -> tuple[int, int]:
+        return self.value
+
+    def __str__(self):
+        return self.name.lower()
+
+    @staticmethod
+    def all() -> list["Direction"]:
+        return list(Direction)
 
 class Tile:
     def __init__(self, pos: Point2, block: Block, rot: TileRotation, config=None):
@@ -52,4 +69,3 @@ class GhostTile(Tile):
 
     def __repr__(self):
         return self.__str__()
-

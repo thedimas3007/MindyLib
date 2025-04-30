@@ -11,8 +11,9 @@ from PIL import Image
 
 from content.blocks import get_block
 from content.blocks.block_types import PowerGenerator
+from g_types import BlockOutput
 from g_types.item_cost import ItemCost
-from .tile import Tile, GhostTile
+from .tile import Tile, GhostTile, Direction
 from .point2 import Point2
 from .block import Block
 from .tile import TileRotation
@@ -83,18 +84,6 @@ class Schematic: # Read only for now
     def cost(self) -> ItemCost:
         return reduce(lambda a, b: a + b, (tile.block.cost for tile in self._tiles))
 
-    def __getitem__(self, item: Point2 | tuple[int, int]) -> Optional[Tile | GhostTile]:
-        if not (isinstance(item, Point2) or isinstance(item, tuple)):
-            raise TypeError("item must be of type Point2 or tuple[int, int]")
-        if isinstance(item, tuple):
-            item = Point2(*item)
-        if item.x < 0 or item.y < 0:
-            raise ValueError("item.x and item.y must be >= 0")
-        if item.x >= self.width or item.y >= self.height:
-            raise ValueError("item.x and item.y must be < width and height respectively")
-
-        return next((tile for tile in self._tiles if tile.pos == item), None)
-
     def save_preview(self, filename: str = "preview.png") -> None:
         preview = Image.new("RGBA", (self.width*32, self.height*32), (0, 0, 0, 0))
         for tile in self._tiles:
@@ -155,6 +144,39 @@ class Schematic: # Read only for now
             else:
                 img.putpixel((tile.x, self.height - tile.y - 1), (0, 255, 0))
         img.save("debug.png")
+
+    def neighbors(self, pos: Point2 | tuple[int, int]) -> list[tuple[Direction, Tile | GhostTile]]:
+        if not (isinstance(pos, Point2) or isinstance(pos, tuple)):
+            raise TypeError("pos must be of type Point2 or tuple[int, int]")
+        if isinstance(pos, tuple):
+            pos = Point2(*pos)
+        if pos.x < 0 or pos.y < 0:
+            raise ValueError("pos.x and pos.y must be >= 0")
+        if pos.x >= self.width or pos.y >= self.height:
+            raise ValueError("pos.x and pos.y must be < width and height respectively")
+
+        tiles = []
+        for direction in Direction.all():
+            new_pos = pos + direction.offset
+            if new_pos in self:
+                tiles.append((direction, self[new_pos]))
+        return tiles
+
+    def __getitem__(self, item: Point2 | tuple[int, int]) -> Optional[Tile | GhostTile]:
+        if not (isinstance(item, Point2) or isinstance(item, tuple)):
+            raise TypeError("item must be of type Point2 or tuple[int, int]")
+        if isinstance(item, tuple):
+            item = Point2(*item)
+        if item.x < 0 or item.y < 0:
+            raise ValueError("item.x and item.y must be >= 0")
+        if item.x >= self.width or item.y >= self.height:
+            raise ValueError("item.x and item.y must be < width and height respectively")
+
+        return next((tile for tile in self._tiles if tile.pos == item), None)
+
+    def __contains__(self, item: Point2 | tuple[int, int]) -> bool:
+        item = Point2.convert(item)
+        return 0 <= item.x < self.width and 0 <= item.y < self.height
 
     @staticmethod
     def from_file(file: str | PathLike | BinaryIO) -> "Schematic":

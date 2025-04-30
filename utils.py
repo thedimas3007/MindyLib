@@ -1,6 +1,6 @@
 from enum import IntFlag
 from struct import unpack
-from typing import Union, IO
+from typing import IO
 
 from content.items import get_item_by_code
 from content.liquids import get_liquid_by_code
@@ -34,7 +34,7 @@ def read_utf(stream: IO) -> str:
     length = int.from_bytes(stream.read(2), "big")
     return stream.read(length).decode("utf-8")
 
-def read_num(stream: IO, num_type: JavaTypes) -> Union[int, float]:
+def read_num(stream: IO, num_type: JavaTypes) -> int | float:
     if num_type.is_float():
         return unpack("f" if num_type.size() == 4 else "d", stream.read(num_type.size()))[0]
     else:
