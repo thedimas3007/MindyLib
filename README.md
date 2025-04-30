@@ -12,7 +12,7 @@ Python-based parser for Mindustry schematics and maps. WIP
     * [ ] Classes for common blocks in `blocks`
       * Conveyors, routers, pipes, etc.
       * Will implement same rendering logic
-  * ~~[ ] Colorful output of tests~~
+  * [ ] ~~Colorful output of tests~~
   * [ ] Comprehensive documentation
   * [ ] Mod support as some sort of "plugin"
 

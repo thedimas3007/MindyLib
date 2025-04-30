@@ -5,11 +5,8 @@ category = "liquid"
 conduit_category = f"{category}/conduits"
 
 class Pump(Block):
-    def __init__(self, name, size, cost, power_consumption=0):
-        super().__init__(name, category, size, cost,
-                         output=BlockOutput.LIQUID,
-                         output_direction=BlockOutputDirection.ALL,
-                         power_consumption=power_consumption)
+    def __init__(self, name, size, cost, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):
+        super().__init__(name, category, size, cost, output, output_direction, power_consumption)
 
 mechanical_pump = Pump("Mechanical Pump", 1, {
     items.copper: 15,

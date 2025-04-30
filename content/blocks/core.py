@@ -4,8 +4,8 @@ from .defense import DefenseBlock
 from .. import items
 
 class StorageBlock(Block):
-    def __init__(self, name, size, cost, **kwargs):
-        super().__init__(name, category, size, cost, **kwargs)
+    def __init__(self, name, size, cost, output=BlockOutput.NONE, output_direction=BlockOutputDirection.NONE, power_consumption=0):
+        super().__init__(name, category, size, cost, output, output_direction, power_consumption)
 
 mender = DefenseBlock("Mender", 1, {
     items.lead: 30,

@@ -1,16 +1,16 @@
-from g_types.block import Block
+from g_types.block import Block, BlockOutput, BlockOutputDirection
 from .. import items
 
 defense_category = "defense"
 wall_category = "walls"
 
 class DefenseBlock(Block):
-    def __init__(self, name, size, cost, power_consumption=0.0, category=defense_category, **kwargs):
-        super().__init__(name, category, size, cost, power_consumption=power_consumption, **kwargs)
-    
+    def __init__(self, name, size, cost, output=BlockOutput.NONE, output_direction=BlockOutputDirection.NONE, power_consumption=0.0, category=defense_category):
+        super().__init__(name, category, size, cost, output, output_direction, power_consumption)
+
 class Wall(DefenseBlock):
-    def __init__(self, name, size, cost, power_consumption=0.0, **kwargs):
-        super().__init__(name, size, cost, power_consumption=power_consumption, category=wall_category, **kwargs)
+    def __init__(self, name, size, cost, output=BlockOutput.NONE, output_direction=BlockOutputDirection.NONE, power_consumption=0.0):
+        super().__init__(name, size, cost, output, output_direction, power_consumption, wall_category)
 
 
 copper_wall = Wall("Copper Wall", 1, {

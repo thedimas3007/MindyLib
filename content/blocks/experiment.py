@@ -1,4 +1,3 @@
-from g_types.block import Block
 from .defense import DefenseBlock
 from .. import items
 

@@ -4,7 +4,7 @@ from .. import items
 category = "campaign"
 
 class Pad(Block):
-    def __init__(self, name, size, cost, power_consumption: float):
+    def __init__(self, name, size, cost, power_consumption=0.0):
         super().__init__(name, category, size, cost, power_consumption=power_consumption)
 
 launch_pad = Pad("Launch Pad",  3, {
@@ -12,7 +12,7 @@ launch_pad = Pad("Launch Pad",  3, {
     items.silicon: 140,
     items.lead: 200,
     items.titanium: 150
-}, 4.0)
+}, power_consumption=4.0)
 
 interplanetary_accelerator = Block("Interplanetary Accelerator",  category, 7, {
     items.copper: 16000,

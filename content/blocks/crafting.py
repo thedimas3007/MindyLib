@@ -4,8 +4,8 @@ from .. import items
 category = "production"
 
 class GenericCrafter(Block):
-    def __init__(self, name, size, cost, **kwargs):
-        super().__init__(name, category, size, cost, **kwargs)
+    def __init__(self, name, size, cost, output=BlockOutput.NONE, output_direction=BlockOutputDirection.NONE, power_consumption=0):
+        super().__init__(name, category, size, cost, output, output_direction, power_consumption)
 
 graphite_press = GenericCrafter("Graphite Press", 2, {
     items.copper: 75,
@@ -139,7 +139,7 @@ oxidation_chamber = GenericCrafter("Oxidation Chamber", 3, {
 electric_heater = GenericCrafter("Electric Heater", 2, {
     items.tungsten: 30,
     items.oxide: 30
-}, power_consumption=50 / 60, output=BlockOutput.NONE, output_direction=BlockOutputDirection.NONE)
+}, power_consumption=50/60, output=BlockOutput.NONE, output_direction=BlockOutputDirection.NONE)
 
 slag_heater = GenericCrafter("Slag Heater", 3, {
     items.tungsten: 50,

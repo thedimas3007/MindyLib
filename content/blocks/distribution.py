@@ -8,8 +8,8 @@ stack_category = f"{distribution}/stack-conveyors"
 unit_category = "units"
 
 class TransportBlock(Block):
-    def __init__(self, name, category, size, cost, output_direction=BlockOutputDirection.ALL, **kwargs):
-        super().__init__(name, category, size, cost, output=BlockOutput.ITEM, output_direction=output_direction, **kwargs)
+    def __init__(self, name, category, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):
+        super().__init__(name, category, size, cost, output, output_direction, power_consumption)
 
 
 conveyor = TransportBlock("Conveyor", conveyor_category, 1, {
