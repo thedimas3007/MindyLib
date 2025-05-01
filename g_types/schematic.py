@@ -11,11 +11,10 @@ from PIL import Image
 
 from content.blocks import get_block
 from content.blocks.block_types import PowerGenerator
-from g_types import BlockOutput
-from g_types.item_cost import ItemCost
+from .block import BlockOutput, BlockOutputDirection
+from .item_cost import ItemCost
 from .tile import Tile, GhostTile, Direction
 from .point2 import Point2
-from .block import Block, BlockOutputDirection
 from .tile import TileRotation
 from utils import JavaTypes, read_num, read_utf, read_obj
 
@@ -92,7 +91,7 @@ class Schematic: # Read only for now
         for tile in self._tiles:
             if isinstance(tile, GhostTile):
                 continue
-            block_img = Image.open(f"sprites/block-{tile.block.id}-ui.png")
+            block_img = tile.block.sprite(self, tile)
             block_img = block_img.rotate(tile.rot.value * 90)
             tile_width = block_img.width // 32
             tile_height = block_img.height // 32
@@ -165,7 +164,7 @@ class Schematic: # Read only for now
                 tiles.append((direction, self[new_pos]))
         return tiles
 
-    def neighboring_outputs(self, pos: Point2 | tuple[int, int], output_type: BlockOutput) -> list[Direction]:
+    def neighboring_inputs(self, pos: Point2 | tuple[int, int], output_type: BlockOutput) -> list[Direction]:
         pos = Point2.convert(pos)
         if pos.x < 0 or pos.y < 0 or pos.x >= self.width or pos.y >= self.height:
             raise ValueError("pos is out of bounds")
@@ -187,6 +186,45 @@ class Schematic: # Read only for now
                 neighboring_directions.append(direction)
 
         return neighboring_directions
+
+    def get_relative_inputs(self, pos: Point2 | tuple[int, int]) -> int:
+        pos = Point2.convert(pos)
+        if not self.within_bounds(pos.x, pos.y):
+            raise ValueError("pos is outside bounds")
+    
+        tile = self[pos]
+        if tile is None:
+            return []
+    
+        neighbors = self.neighboring_inputs(pos, tile.block.output)
+        inputs = 0
+
+        for direction in neighbors:
+            if tile.rot == TileRotation.RIGHT:
+                if direction == Direction.TOP: inputs |= BlockOutputDirection.LEFT.value
+                elif direction == Direction.RIGHT: inputs |= BlockOutputDirection.BOTTOM.value
+                elif direction == Direction.BOTTOM: inputs |= BlockOutputDirection.RIGHT.value
+                elif direction == Direction.LEFT: inputs |= BlockOutputDirection.TOP.value
+
+            elif tile.rot == TileRotation.UP:
+                if direction == Direction.LEFT: inputs |= BlockOutputDirection.LEFT.value
+                elif direction == Direction.RIGHT: inputs |= BlockOutputDirection.RIGHT.value
+                elif direction == Direction.TOP: inputs |= BlockOutputDirection.TOP.value
+                elif direction == Direction.BOTTOM: inputs |= BlockOutputDirection.BOTTOM.value
+
+            elif tile.rot == TileRotation.LEFT:
+                if direction == Direction.LEFT: inputs |= BlockOutputDirection.BOTTOM.value
+                elif direction == Direction.RIGHT: inputs |= BlockOutputDirection.TOP.value
+                elif direction == Direction.TOP: inputs |= BlockOutputDirection.LEFT.value
+                elif direction == Direction.BOTTOM: inputs |= BlockOutputDirection.RIGHT.value
+
+            elif tile.rot == TileRotation.BOTTOM:
+                if direction == Direction.LEFT: inputs |= BlockOutputDirection.RIGHT.value
+                elif direction == Direction.RIGHT: inputs |= BlockOutputDirection.LEFT.value
+                elif direction == Direction.TOP: inputs |= BlockOutputDirection.BOTTOM.value
+                elif direction == Direction.BOTTOM: inputs |= BlockOutputDirection.TOP.value
+    
+        return inputs
 
     def __getitem__(self, item: Point2 | tuple[int, int]) -> Optional[Tile | GhostTile]:
         item = Point2.convert(item)

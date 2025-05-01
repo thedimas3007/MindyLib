@@ -5,9 +5,9 @@ from .block import Block, BlockOutputDirection, BlockOutput
 
 class TileRotation(Flag):
     RIGHT = 0
-    UP = auto()
-    LEFT = auto()
-    BOTTOM = auto()
+    UP = 1
+    LEFT = 2
+    BOTTOM = 3
 
     @staticmethod
     def from_int(i):

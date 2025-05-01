@@ -1,8 +1,11 @@
 from enum import Flag, auto
+from typing import Optional
 from PIL import Image
 
 from .item import Item
 from .item_cost import ItemCost
+# from .schematic import Schematic
+# from .tile import Tile
 from string_utils import space_to_kebab
 
 class BlockOutput(Flag):
@@ -14,9 +17,9 @@ class BlockOutput(Flag):
 
 class BlockOutputDirection(Flag):
     NONE = 0
-    FRONT = auto()
+    TOP = FRONT = auto()
     RIGHT = auto()
-    REAR = auto()
+    BOTTOM = REAR = auto()
     LEFT = auto()
     ALL = FRONT | REAR | LEFT | RIGHT
 
@@ -35,9 +38,11 @@ class Block:
     def energy_usage(self) -> float:
         return self.power_consumption * 60
 
-    @property
-    def sprite(self) -> Image.Image:
-        return Image.open(f"sprites/ui/block-{self.id}-ui.png")
+    def _sprite_path(self, name: Optional[str] = None) -> str: # Maybe I should move it to another place
+        return f"sprites/blocks/{self.category}/{name or self.id}.png"
+
+    def sprite(self, schematic, tile) -> Image.Image:
+        return Image.open(self._sprite_path())
 
     def __str__(self):
         return f"Block(\"{self.name}\", \"{self.category}\", {self.size}, {self.cost}, {self.output}, {self.output_direction}, {self.power_consumption})"
