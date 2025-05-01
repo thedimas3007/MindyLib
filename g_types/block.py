@@ -1,8 +1,9 @@
+from enum import Flag, auto
+from PIL import Image
+
 from .item import Item
 from .item_cost import ItemCost
 from string_utils import space_to_kebab
-
-from enum import Flag, auto
 
 class BlockOutput(Flag):
     NONE = 0
@@ -14,9 +15,9 @@ class BlockOutput(Flag):
 class BlockOutputDirection(Flag):
     NONE = 0
     FRONT = auto()
+    RIGHT = auto()
     REAR = auto()
     LEFT = auto()
-    RIGHT = auto()
     ALL = FRONT | REAR | LEFT | RIGHT
 
 class Block:
@@ -33,6 +34,10 @@ class Block:
     @property
     def energy_usage(self) -> float:
         return self.power_consumption * 60
+
+    @property
+    def sprite(self) -> Image.Image:
+        return Image.open(f"sprites/ui/block-{self.id}-ui.png")
 
     def __str__(self):
         return f"Block(\"{self.name}\", \"{self.category}\", {self.size}, {self.cost}, {self.output}, {self.output_direction}, {self.power_consumption})"

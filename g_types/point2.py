@@ -1,3 +1,6 @@
+from typing import Union
+
+
 class Point2: # TODO: floats
     def __init__(self, x: int, y: int):
         self.x = x
@@ -42,15 +45,15 @@ class Point2: # TODO: floats
     def __repr__(self):
         return self.__str__()
 
-    def __eq__(self, other: "Point2" | tuple[int, int]):
+    def __eq__(self, other: Union["Point2", tuple[int, int]]):
         other = Point2.convert(other)
         return self.x == other.x and self.y == other.y
 
-    def __gt__(self, other: "Point2" | tuple[int, int]):
+    def __gt__(self, other: Union["Point2", tuple[int, int]]):
         other = Point2.convert(other)
         return self.x > other.x and self.y > other.y
 
-    def __lt__(self, other: "Point2" | tuple[int, int]):
+    def __lt__(self, other: Union["Point2", tuple[int, int]]):
         other = Point2.convert(other)
         return self.x < other.x and self.y < other.y
 
@@ -66,7 +69,7 @@ class Point2: # TODO: floats
         other = Point2.convert(other)
         return Point2(self.x + other.x, self.y + other.y)
 
-    def __sub__(self, other: "Point2" | tuple[int, int]):
+    def __sub__(self, other: Union["Point2", tuple[int, int]]):
         other = Point2.convert(other)
         return Point2(self.x - other.x, self.y - other.y)
 
