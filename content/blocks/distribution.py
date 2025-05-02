@@ -1,5 +1,5 @@
 from g_types.block import Block, BlockOutput, BlockOutputDirection
-from .block_types import TransportBlock, Conveyor
+from .block_types import TransportBlock, Conveyor, Sorter
 from .. import items
 
 distribution = "distribution"
@@ -46,12 +46,12 @@ phase_conveyor = TransportBlock("Phase Conveyor", 1, {
     items.graphite: 10
 }, power_consumption=0.3)
 
-sorter = TransportBlock("Sorter", 1, {
+sorter = Sorter("Sorter", 1, {
     items.lead: 2,
     items.copper: 2
 })
 
-inverted_sorter = TransportBlock("Inverted Sorter", 1, {
+inverted_sorter = Sorter("Inverted Sorter", 1, {
     items.lead: 2,
     items.copper: 2
 })

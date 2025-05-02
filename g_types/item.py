@@ -6,8 +6,12 @@ class Item:
         self.name = name
         self.color = color
 
+    @property
+    def tuple_color(self) -> tuple[int, ...]:
+        return self.color >> 16, (self.color >> 8) & 0xFF, self.color & 0xFF, 255
+
     def __hash__(self):
-            return hash(self.id)
+        return hash(self.id)
 
     def __eq__(self, other):
         return self.id == other.id

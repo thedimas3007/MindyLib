@@ -92,7 +92,7 @@ class Schematic: # Read only for now
             if isinstance(tile, GhostTile):
                 continue
             block_img = tile.block.sprite(self, tile)
-            block_img = block_img.rotate(tile.rot.value * 90)
+            # block_img = block_img.rotate(tile.rot.value * 90)
             tile_width = block_img.width // 32
             tile_height = block_img.height // 32
 
@@ -187,43 +187,43 @@ class Schematic: # Read only for now
 
         return neighboring_directions
 
-    def get_relative_inputs(self, pos: Point2 | tuple[int, int]) -> int:
+    def get_relative_inputs(self, pos: Point2 | tuple[int, int]) -> BlockOutputDirection:
         pos = Point2.convert(pos)
         if not self.within_bounds(pos.x, pos.y):
             raise ValueError("pos is outside bounds")
     
         tile = self[pos]
         if tile is None:
-            return []
+            return BlockOutputDirection.NONE
     
         neighbors = self.neighboring_inputs(pos, tile.block.output)
-        inputs = 0
+        inputs = BlockOutputDirection.NONE
 
         for direction in neighbors:
             if tile.rot == TileRotation.RIGHT:
-                if direction == Direction.TOP: inputs |= BlockOutputDirection.LEFT.value
-                elif direction == Direction.RIGHT: inputs |= BlockOutputDirection.BOTTOM.value
-                elif direction == Direction.BOTTOM: inputs |= BlockOutputDirection.RIGHT.value
-                elif direction == Direction.LEFT: inputs |= BlockOutputDirection.TOP.value
+                if direction == Direction.TOP: inputs |= BlockOutputDirection.LEFT
+                elif direction == Direction.RIGHT: inputs |= BlockOutputDirection.TOP
+                elif direction == Direction.BOTTOM: inputs |= BlockOutputDirection.RIGHT
+                elif direction == Direction.LEFT: inputs |= BlockOutputDirection.BOTTOM
 
             elif tile.rot == TileRotation.UP:
-                if direction == Direction.LEFT: inputs |= BlockOutputDirection.LEFT.value
-                elif direction == Direction.RIGHT: inputs |= BlockOutputDirection.RIGHT.value
-                elif direction == Direction.TOP: inputs |= BlockOutputDirection.TOP.value
-                elif direction == Direction.BOTTOM: inputs |= BlockOutputDirection.BOTTOM.value
+                if direction == Direction.TOP: inputs |= BlockOutputDirection.TOP
+                elif direction == Direction.RIGHT: inputs |= BlockOutputDirection.RIGHT
+                elif direction == Direction.BOTTOM: inputs |= BlockOutputDirection.BOTTOM
+                elif direction == Direction.LEFT: inputs |= BlockOutputDirection.LEFT
 
             elif tile.rot == TileRotation.LEFT:
-                if direction == Direction.LEFT: inputs |= BlockOutputDirection.BOTTOM.value
-                elif direction == Direction.RIGHT: inputs |= BlockOutputDirection.TOP.value
-                elif direction == Direction.TOP: inputs |= BlockOutputDirection.LEFT.value
-                elif direction == Direction.BOTTOM: inputs |= BlockOutputDirection.RIGHT.value
+                if direction == Direction.TOP: inputs |= BlockOutputDirection.RIGHT
+                elif direction == Direction.RIGHT: inputs |= BlockOutputDirection.BOTTOM
+                elif direction == Direction.BOTTOM: inputs |= BlockOutputDirection.LEFT
+                elif direction == Direction.LEFT: inputs |= BlockOutputDirection.TOP
 
             elif tile.rot == TileRotation.BOTTOM:
-                if direction == Direction.LEFT: inputs |= BlockOutputDirection.RIGHT.value
-                elif direction == Direction.RIGHT: inputs |= BlockOutputDirection.LEFT.value
-                elif direction == Direction.TOP: inputs |= BlockOutputDirection.BOTTOM.value
-                elif direction == Direction.BOTTOM: inputs |= BlockOutputDirection.TOP.value
-    
+                if direction == Direction.TOP: inputs |= BlockOutputDirection.BOTTOM
+                elif direction == Direction.RIGHT: inputs |= BlockOutputDirection.LEFT
+                elif direction == Direction.BOTTOM: inputs |= BlockOutputDirection.TOP
+                elif direction == Direction.LEFT: inputs |= BlockOutputDirection.RIGHT
+
         return inputs
 
     def __getitem__(self, item: Point2 | tuple[int, int]) -> Optional[Tile | GhostTile]:

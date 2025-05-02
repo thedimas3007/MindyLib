@@ -34,26 +34,54 @@ class Conveyor(Block):
     def sprite(self, schematic, tile) -> Image.Image:
         BOD = BlockOutputDirection
         inputs = schematic.get_relative_inputs(tile.pos)
-        mask = (BOD.LEFT | BOD.BOTTOM | BOD.RIGHT).value
+        mask = (BOD.LEFT | BOD.BOTTOM | BOD.RIGHT)
 
         n = 0
-        if (inputs & (BOD.LEFT | BOD.RIGHT).value) == BOD.NONE.value:
+        flip = None
+
+        if inputs & BOD.LEFT:
+            if inputs & BOD.RIGHT:
+                if inputs & BOD.BOTTOM:
+                    n = 3  # LEFT + RIGHT + BOTTOM
+                else:
+                    n = 4  # LEFT + RIGHT
+            elif inputs & BOD.BOTTOM:
+                n = 2
+                flip = Image.FLIP_TOP_BOTTOM  # LEFT + BOTTOM
+            else:
+                n = 1  # LEFT only
+
+        elif inputs & BOD.RIGHT:
+            if inputs & BOD.BOTTOM:
+                n = 2  # RIGHT + BOTTOM
+            else:
+                n = 1
+                flip = Image.FLIP_TOP_BOTTOM  # RIGHT only
+
+        elif (inputs & (BOD.LEFT | BOD.RIGHT)) == BOD.NONE:
             n = 0
-        elif (inputs & mask) == BOD.LEFT.value:
-            n = 1
-        elif (inputs & mask) == (BOD.BOTTOM | BOD.RIGHT).value:
-            n = 2
-        elif (inputs & mask) == (BOD.LEFT | BOD.RIGHT | BOD.BOTTOM).value:
-            n = 3
-        elif (inputs & mask) == (BOD.LEFT | BOD.RIGHT).value:
-            n = 4
+
         else:
             print(f"ERROR: No 'n' for {tile.pos}")
-        # print(f"{tile.pos}:\ti={inputs:#06b}, m={mask:#06b}, m={n}")
+        print(f"{tile.pos}:\ti={inputs}\tn={n}")
         img = Image.open(self._sprite_path(f"{self.id}-{n}-0")) # second zero is just animation frame; GIFs anyone? :P
         if tile.rot == TileRotation.LEFT:
             img = img.transpose(Image.FLIP_TOP_BOTTOM)
-        return img
+        if flip:
+            img = img.transpose(flip)
+        return img.rotate(tile.rot.value * 90, expand=True)
+
+class Sorter(TransportBlock):
+    def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):
+        super().__init__(name, size, cost, output, output_direction, power_consumption)
+
+    def sprite(self, schematic, tile) -> Image.Image:
+        config = Image.open(self._sprite_path(f"cross-full")) if not tile.config else \
+            Image.new("RGBA", (32,32), tile.config.tuple_color)
+        sprite = Image.open(self._sprite_path())
+        config.paste(sprite, (0, 0), sprite)
+        return config
+
 
 class Pump(Block):
     def __init__(self, name, size, cost, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):
