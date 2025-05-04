@@ -20,7 +20,7 @@ Python-based parser for Mindustry schematics and maps. WIP
   * [ ] Comprehensive documentation
   * [ ] Mod support as some sort of "plugin"
 
-* Rendering implementation progress
+* **Rendering implementation progress**
   * [x] Campaign
   * [ ] Core
   * [ ] Crafting
@@ -49,5 +49,5 @@ Python-based parser for Mindustry schematics and maps. WIP
     * Maybe show those canvases rendered
   * [x] More information about schematics
 
-* Maps
+* **Maps**
   * *Eventually*

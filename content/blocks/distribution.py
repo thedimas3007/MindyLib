@@ -28,7 +28,7 @@ armored_conveyor = Conveyor("Armored Conveyor", 1, {
     items.plastanium: 1,
     items.thorium: 1,
     items.metaglass: 1
-}, output_direction=BlockOutputDirection.FRONT)
+}, output_direction=BlockOutputDirection.FRONT, strict=True)
 
 junction = TransportBlock("Junction", 1, {
     items.copper: 2

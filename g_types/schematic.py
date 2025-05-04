@@ -10,7 +10,7 @@ from typing import IO, BinaryIO, Optional
 from PIL import Image
 
 from content.blocks import get_block
-from content.blocks.block_types import PowerGenerator
+from content.blocks.block_types import PowerGenerator, Conveyor
 from .block import BlockOutput, BlockOutputDirection
 from .item_cost import ItemCost
 from .tile import Tile, GhostTile, Direction
@@ -164,7 +164,7 @@ class Schematic: # Read only for now
                 tiles.append((direction, self[new_pos]))
         return tiles
 
-    def neighboring_inputs(self, pos: Point2 | tuple[int, int], output_type: BlockOutput) -> list[Direction]:
+    def neighboring_inputs(self, pos: Point2 | tuple[int, int], output_type: BlockOutput, only_type: Optional[type] = None) -> list[Direction]:
         pos = Point2.convert(pos)
         if pos.x < 0 or pos.y < 0 or pos.x >= self.width or pos.y >= self.height:
             raise ValueError("pos is out of bounds")
@@ -182,12 +182,12 @@ class Schematic: # Read only for now
                 continue
 
             actual_dir = neighbor_tile.rotated_output()
-            if direction.inverted() in actual_dir:
+            if direction.inverted() in actual_dir and (only_type is None or isinstance(neighbor_tile.block, only_type)):
                 neighboring_directions.append(direction)
 
         return neighboring_directions
 
-    def get_relative_inputs(self, pos: Point2 | tuple[int, int]) -> BlockOutputDirection:
+    def get_relative_inputs(self, pos: Point2 | tuple[int, int], only_type: Optional[type] = None) -> BlockOutputDirection:
         pos = Point2.convert(pos)
         if not self.within_bounds(pos.x, pos.y):
             raise ValueError("pos is outside bounds")
@@ -196,7 +196,7 @@ class Schematic: # Read only for now
         if tile is None:
             return BlockOutputDirection.NONE
     
-        neighbors = self.neighboring_inputs(pos, tile.block.output)
+        neighbors = self.neighboring_inputs(pos, tile.block.output, only_type)
         inputs = BlockOutputDirection.NONE
 
         for direction in neighbors:

@@ -28,12 +28,13 @@ class TransportBlock(Block):
         super().__init__(name, "distribution", size, cost, output, output_direction, power_consumption)
 
 class Conveyor(Block):
-    def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):
+    def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=0.0, strict=False):
         super().__init__(name, "distribution/conveyors", size, cost, output, output_direction, power_consumption)
+        self.strict = strict
 
     def sprite(self, schematic, tile) -> Image.Image:
         BOD = BlockOutputDirection
-        inputs = schematic.get_relative_inputs(tile.pos)
+        inputs = schematic.get_relative_inputs(tile.pos, Conveyor if self.strict else None)
         mask = (BOD.LEFT | BOD.BOTTOM | BOD.RIGHT)
 
         n = 0
@@ -65,8 +66,6 @@ class Conveyor(Block):
             print(f"ERROR: No 'n' for {tile.pos}")
         print(f"{tile.pos}:\ti={inputs}\tn={n}")
         img = Image.open(self._sprite_path(f"{self.id}-{n}-0")) # second zero is just animation frame; GIFs anyone? :P
-        if tile.rot == TileRotation.LEFT:
-            img = img.transpose(Image.FLIP_TOP_BOTTOM)
         if flip:
             img = img.transpose(flip)
         return img.rotate(tile.rot.value * 90, expand=True)
