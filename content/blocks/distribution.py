@@ -1,5 +1,5 @@
 from g_types.block import Block, BlockOutput, BlockOutputDirection
-from .block_types import TransportBlock, Conveyor, Sorter, StackConveyor
+from .block_types import TransportBlock, Conveyor, Sorter, StackConveyor, BridgeConveyor
 from .. import items
 
 distribution = "distribution"
@@ -34,12 +34,12 @@ junction = TransportBlock("Junction", 1, {
     items.copper: 2
 })
 
-item_bridge = TransportBlock("Bridge Conveyor", 1, {
+item_bridge = BridgeConveyor("Bridge Conveyor", 1, {
     items.lead: 6,
     items.copper: 6
 })
 
-phase_conveyor = TransportBlock("Phase Conveyor", 1, {
+phase_conveyor = BridgeConveyor("Phase Conveyor", 1, {
     items.phase_fabric: 5,
     items.silicon: 7,
     items.lead: 10,

@@ -2,9 +2,11 @@ from enum import IntFlag
 from struct import unpack
 from typing import IO
 
+from PIL import Image, ImageEnhance
+
 from content.items import get_item_by_code
 from content.liquids import get_liquid_by_code
-from g_types import Point2
+from g_types.point2 import Point2
 
 class JavaTypes(IntFlag):
     BYTE     = 1
@@ -94,3 +96,13 @@ def read_obj(stream: IO) -> object:
     elif obj_type == 23: return f"UnitCommand[{read_num(stream, JavaTypes.BYTE)}]" # UnitCommand
     else:
         raise Exception(f"Unknown object type: {obj_type}")
+
+def paste_opacity(bg: Image.Image, fg: Image.Image, pos: tuple[int, int], opacity=1.0):
+        if opacity < 0 or opacity > 1:
+            raise ValueError("opacity must be >=0 and <=1")
+
+        fg = fg.convert("RGBA")
+        alpha = fg.split()[3]
+        alpha = ImageEnhance.Brightness(alpha).enhance(opacity)
+        fg.putalpha(alpha)
+        bg.paste(fg, pos, fg)

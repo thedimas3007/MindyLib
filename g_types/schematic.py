@@ -7,17 +7,17 @@ from math import floor, ceil
 from os import PathLike
 from typing import IO, BinaryIO, Optional
 
-from PIL import Image
+from PIL import Image, ImageEnhance
 from scipy.optimize import direct
 
 from content.blocks import get_block
-from content.blocks.block_types import PowerGenerator, Conveyor, StackConveyor
+from content.blocks.block_types import PowerGenerator, Conveyor, StackConveyor, BridgeConveyor
 from .block import BlockOutput, BlockOutputDirection
 from .item_cost import ItemCost
 from .tile import Tile, GhostTile, Direction
 from .point2 import Point2
 from .tile import TileRotation
-from utils import JavaTypes, read_num, read_utf, read_obj
+from utils import JavaTypes, read_num, read_utf, read_obj, paste_opacity
 
 
 class Schematic: # Read only for now
@@ -150,11 +150,38 @@ class Schematic: # Read only for now
         return directions
 
     def _update_stacked_convs(self):
-        conveyors = list(filter(lambda t: isinstance(t.block, StackConveyor), self._tiles))
+        conveyors: list[Tile] = list(filter(lambda t: isinstance(t.block, StackConveyor), self._tiles))
         for conv in conveyors:
             outputs = self.rotated_outputs(conv.pos, StackConveyor)
             if not outputs & BlockOutputDirection.TOP: # No frontal outputs - last block of the chain
                 conv.block.output_direction = BlockOutputDirection.ALL
+
+    def _render_bridges(self, image: Image.Image, opacity=0.8):
+        bridges: list[Tile] = list(filter(lambda t: isinstance(t.block, BridgeConveyor), self._tiles))
+
+        for bridge in bridges:
+            pos = Point2.convert(bridge.config)
+            target_x = bridge.x + pos.x
+            target_y = bridge.y + pos.y
+
+            if (pos.x != 0 and pos.y != 0) or (pos.x == 0 and pos.y == 0):
+                continue
+
+            dist = max(abs(pos.x), abs(pos.y)) - 1
+            if dist <= 0:
+                continue
+
+            step_x = 1 if pos.x > 0 else -1 if pos.x < 0 else 0
+            step_y = 1 if pos.y > 0 else -1 if pos.y < 0 else 0
+
+            bridge_img = Image.open(f"sprites/blocks/distribution/{bridge.block.id}-bridge.png").convert("RGBA")
+            pos = Point2(bridge.x + step_x, bridge.y + step_y)
+
+            for i in range(dist):
+                if self.within_bounds(pos):
+                    paste_opacity(image, bridge_img, (pos.x * 32, (self._height - pos.y) * 32 - bridge_img.height), opacity)
+
+                pos = Point2(pos.x + step_x, pos.y + step_y)
 
     def within_bounds(self, pos: Point2 | tuple[int, int]) -> bool:
         pos = Point2.convert(pos)
@@ -177,6 +204,7 @@ class Schematic: # Read only for now
             flipped_y = (self.height - tile.y - tile_height + y_offset) * 32
 
             preview.paste(block_img, (x_pos, flipped_y))
+        self._render_bridges(preview)
         preview.save(filename)
 
     def render_canvases(self) -> None:

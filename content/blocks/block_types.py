@@ -64,7 +64,7 @@ class Conveyor(Block):
 
         else:
             print(f"ERROR: No 'n' for {tile.pos}")
-        print(f"{tile.pos}:\ti={inputs}\tn={n}")
+        # print(f"{tile.pos}:\ti={inputs}\tn={n}")
         img = Image.open(self._sprite_path(f"{self.id}-{n}-0")) # second zero is just animation frame; GIFs anyone? :P
         if flip:
             img = img.transpose(flip)
@@ -112,9 +112,11 @@ class StackConveyor(Block):
                 rotated = edge.rotate(angles[s])
                 img.paste(rotated, (0,0), rotated)
 
-        print(f"{tile.pos}\ti={inputs}\to={outputs}\tn={n}")
+        # print(f"{tile.pos}\ti={inputs}\to={outputs}\tn={n}")
         return img.rotate(tile.rot.value * 90)
 
+class BridgeConveyor(TransportBlock):
+    pass # Just to indicate that current block should be rendered as a bridge
 
 class Sorter(TransportBlock):
     def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):
