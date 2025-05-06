@@ -84,8 +84,9 @@ class Schematic: # Read only for now
     def cost(self) -> ItemCost:
         return reduce(lambda a, b: a + b, (tile.block.cost for tile in self._tiles))
 
-    def within_bounds(self, x: int, y: int) -> bool:
-        return 0 <= x < self._width and 0 <= y < self._height
+    def within_bounds(self, pos: Point2 | tuple[int, int]) -> bool:
+        pos = Point2.convert(pos)
+        return 0 <= pos.x < self._width and 0 <= pos.y < self._height
 
     def save_preview(self, filename: str = "preview.png") -> None:
         preview = Image.new("RGBA", (self.width*32, self.height*32), (0, 0, 0, 0))
@@ -148,12 +149,12 @@ class Schematic: # Read only for now
                 img.putpixel((tile.x, self.height - tile.y - 1), (0, 255, 0))
         img.save("debug.png")
 
-    def neighbors(self, pos: Point2 | tuple[int, int]) -> list[tuple[Direction, Tile | GhostTile]]: # TODO: for blocks bigger than 1x1
+    def adjacent_tiles(self, pos: Point2 | tuple[int, int]) -> list[tuple[Direction, Tile | GhostTile]]: # TODO: for blocks bigger than 1x1
         if not (isinstance(pos, Point2) or isinstance(pos, tuple)):
             raise TypeError("pos must be of type Point2 or tuple[int, int]")
         if isinstance(pos, tuple):
             pos = Point2(*pos)
-        if not self.within_bounds(pos.x, pos.y):
+        if not self.within_bounds(pos):
             raise ValueError("pos is outside bounds")
 
         tiles = []
@@ -165,7 +166,7 @@ class Schematic: # Read only for now
                 tiles.append((direction, self[new_pos]))
         return tiles
 
-    def _neighboring_dirs(self, pos: Point2 | tuple[int, int], output_type: BlockOutput, only_type: Optional[type], incoming: bool):
+    def _connection_dirs(self, pos: Point2 | tuple[int, int], output_type: BlockOutput, only_type: Optional[type], incoming: bool):
         pos = Point2.convert(pos)
         if pos.x < 0 or pos.y < 0 or pos.x >= self.width or pos.y >= self.height:
             raise ValueError("pos is out of bounds")
@@ -173,7 +174,7 @@ class Schematic: # Read only for now
 
         for direction in Direction.all():
             neighbor_pos = pos + direction.offset
-            if not self.within_bounds(neighbor_pos.x, neighbor_pos.y):
+            if not self.within_bounds(neighbor_pos):
                 continue
 
             neighbor_tile = self[neighbor_pos]
@@ -189,23 +190,23 @@ class Schematic: # Read only for now
 
         return neighboring_directions
 
-    def neighboring_inputs(self, pos: Point2 | tuple[int, int], output_type: BlockOutput, only_type: Optional[type] = None) -> list[Direction]:
-        return self._neighboring_dirs(pos, output_type, only_type, True)
+    def input_dirs(self, pos: Point2 | tuple[int, int], output_type: BlockOutput, only_type: Optional[type] = None) -> list[Direction]:
+        return self._connection_dirs(pos, output_type, only_type, True)
 
-    def neighboring_outputs(self, pos: Point2 | tuple[int, int], output_type: BlockOutput, only_type: Optional[type] = None) -> list[Direction]:
-        return self._neighboring_dirs(pos, output_type, only_type, False)
+    def output_dirs(self, pos: Point2 | tuple[int, int], output_type: BlockOutput, only_type: Optional[type] = None) -> list[Direction]:
+        return self._connection_dirs(pos, output_type, only_type, False)
 
-    def _absolute_relatives(self, pos: Point2 | tuple[int, int], only_type: Optional[type], incoming: bool):
+    def _rotated_dirs(self, pos: Point2 | tuple[int, int], only_type: Optional[type], incoming: bool):
         pos = Point2.convert(pos)
-        if not self.within_bounds(pos.x, pos.y):
+        if not self.within_bounds(pos):
             raise ValueError("pos is outside bounds")
 
         tile = self[pos]
         if tile is None:
             return BlockOutputDirection.NONE
 
-        neighbors = self.neighboring_inputs(pos, tile.block.output, only_type) if incoming \
-            else self.neighboring_outputs(pos, tile.block.output, only_type)
+        neighbors = self.input_dirs(pos, tile.block.output, only_type) if incoming \
+            else self.output_dirs(pos, tile.block.output, only_type)
         directions = BlockOutputDirection.NONE
 
         for direction in neighbors:
@@ -235,22 +236,22 @@ class Schematic: # Read only for now
 
         return directions
 
-    def get_relative_inputs(self, pos: Point2 | tuple[int, int], only_type: Optional[type] = None) -> BlockOutputDirection:
-        return self._absolute_relatives(pos, only_type, True)
+    def rotated_inputs(self, pos: Point2 | tuple[int, int], only_type: Optional[type] = None) -> BlockOutputDirection:
+        return self._rotated_dirs(pos, only_type, True)
 
-    def get_relative_outputs(self, pos: Point2 | tuple[int, int], only_type: Optional[type] = None) -> BlockOutputDirection:
-        return self._absolute_relatives(pos, only_type, False)
+    def rotated_outputs(self, pos: Point2 | tuple[int, int], only_type: Optional[type] = None) -> BlockOutputDirection:
+        return self._rotated_dirs(pos, only_type, False)
 
     def __getitem__(self, item: Point2 | tuple[int, int]) -> Optional[Tile | GhostTile]:
         item = Point2.convert(item)
-        if not self.within_bounds(item.x, item.y):
+        if not self.within_bounds(item):
             raise ValueError("item is outside bounds")
 
         return next((tile for tile in self._tiles if tile.pos == item), None)
 
     def __contains__(self, item: Point2 | tuple[int, int]) -> bool:
         item = Point2.convert(item)
-        return self.within_bounds(item.x, item.y)
+        return self.within_bounds(item)
 
     @staticmethod
     def from_file(file: str | PathLike | BinaryIO) -> "Schematic":

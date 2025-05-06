@@ -34,7 +34,7 @@ class Conveyor(Block):
 
     def sprite(self, schematic, tile) -> Image.Image:
         BOD = BlockOutputDirection
-        inputs = schematic.get_relative_inputs(tile.pos, Conveyor if self.strict else None)
+        inputs = schematic.rotated_inputs(tile.pos, Conveyor if self.strict else None)
         mask = (BOD.LEFT | BOD.BOTTOM | BOD.RIGHT)
 
         n = 0
@@ -76,8 +76,8 @@ class StackConveyor(Block):
 
     def sprite(self, schematic, tile) -> Image.Image:
         BOD = BlockOutputDirection
-        inputs = schematic.get_relative_inputs(tile.pos, StackConveyor)
-        outputs = schematic.get_relative_outputs(tile.pos, StackConveyor)
+        inputs = schematic.rotated_inputs(tile.pos, StackConveyor)
+        outputs = schematic.rotated_outputs(tile.pos, StackConveyor)
         input_mask = (BOD.LEFT | BOD.BOTTOM | BOD.RIGHT)
         output_mask = (BOD.LEFT | BOD.TOP | BOD.RIGHT)
         n = 0
@@ -104,7 +104,7 @@ class StackConveyor(Block):
         img = Image.open(self._sprite_path(f"{self.id}-{n}")).convert("RGBA")
         edge = Image.open(self._sprite_path(f"{self.id}-edge")).convert("RGBA")
 
-        all_inputs = schematic.get_relative_inputs(tile.pos)
+        all_inputs = schematic.rotated_inputs(tile.pos)
         for s in (BOD.TOP, BOD.RIGHT, BOD.BOTTOM, BOD.LEFT):
             if s == BOD.TOP and outputs & BOD.TOP:
                 pass # Skip top if the conveyor isn't the last one
