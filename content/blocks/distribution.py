@@ -1,5 +1,5 @@
 from g_types.block import Block, BlockOutput, BlockOutputDirection
-from .block_types import TransportBlock, Conveyor, Sorter
+from .block_types import TransportBlock, Conveyor, Sorter, StackConveyor
 from .. import items
 
 distribution = "distribution"
@@ -18,11 +18,11 @@ titanium_conveyor = Conveyor("Titanium Conveyor", 1, {
     items.titanium: 1
 }, output_direction=BlockOutputDirection.FRONT)
 
-plastanium_conveyor = TransportBlock("Plastanium Conveyor", 1, {
+plastanium_conveyor = StackConveyor("Plastanium Conveyor", 1, {
     items.plastanium: 1,
     items.silicon: 1,
     items.graphite: 1
-}, output_direction=BlockOutputDirection.NONE)
+}, output_direction=BlockOutputDirection.FRONT)
 
 armored_conveyor = Conveyor("Armored Conveyor", 1, {
     items.plastanium: 1,
@@ -118,10 +118,10 @@ duct_unloader = TransportBlock("Duct Unloader", 1, {
     items.tungsten: 10
 })
 
-surge_conveyor = TransportBlock("Surge Conveyor", 1, {
+surge_conveyor = StackConveyor("Surge Conveyor", 1, {
     items.surge_alloy: 1,
     items.tungsten: 1
-}, output_direction=BlockOutputDirection.NONE, power_consumption=1/60)
+}, output_direction=BlockOutputDirection.FRONT, power_consumption=1/60)
 
 surge_router = TransportBlock("Surge Router", 1, {
     items.surge_alloy: 5,

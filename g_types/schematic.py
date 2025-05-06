@@ -187,6 +187,36 @@ class Schematic: # Read only for now
 
         return neighboring_directions
 
+    def neighboring_outputs(self, pos: Point2 | tuple[int, int], output_type: BlockOutput, only_type: Optional[type] = None) -> list[Direction]:
+        pos = Point2.convert(pos)
+        if pos.x < 0 or pos.y < 0 or pos.x >= self.width or pos.y >= self.height:
+            raise ValueError("pos is out of bounds")
+
+        neighboring_directions = []
+
+        tile = self[pos]
+        if tile is None:
+            return neighboring_directions
+
+        actual_outputs = tile.rotated_output()
+
+        for direction in actual_outputs:
+            neighbor_pos = pos + direction.offset
+            if not self.within_bounds(neighbor_pos.x, neighbor_pos.y):
+                continue
+
+            neighbor_tile = self[neighbor_pos]
+            if neighbor_tile is None:
+                continue
+
+            if output_type & tile.block.output == BlockOutput.NONE:
+                continue
+
+            if only_type is None or isinstance(neighbor_tile.block, only_type):
+                neighboring_directions.append(direction)
+
+        return neighboring_directions
+
     def get_relative_inputs(self, pos: Point2 | tuple[int, int], only_type: Optional[type] = None) -> BlockOutputDirection:
         pos = Point2.convert(pos)
         if not self.within_bounds(pos.x, pos.y):
@@ -225,6 +255,45 @@ class Schematic: # Read only for now
                 elif direction == Direction.LEFT: inputs |= BlockOutputDirection.RIGHT
 
         return inputs
+
+    def get_relative_outputs(self, pos: Point2 | tuple[int, int], only_type: Optional[type] = None) -> BlockOutputDirection:
+        pos = Point2.convert(pos)
+        if not self.within_bounds(pos.x, pos.y):
+            raise ValueError("pos is outside bounds")
+
+        tile = self[pos]
+        if tile is None:
+            return BlockOutputDirection.NONE
+
+        outputs = BlockOutputDirection.NONE
+        neighbors = self.neighboring_outputs(pos, tile.block.output, only_type)
+
+        for direction in neighbors:
+            if tile.rot == TileRotation.RIGHT:
+                if direction == Direction.TOP: outputs |= BlockOutputDirection.LEFT
+                elif direction == Direction.RIGHT: outputs |= BlockOutputDirection.TOP
+                elif direction == Direction.BOTTOM: outputs |= BlockOutputDirection.RIGHT
+                elif direction == Direction.LEFT: outputs |= BlockOutputDirection.BOTTOM
+
+            elif tile.rot == TileRotation.UP:
+                if direction == Direction.TOP: outputs |= BlockOutputDirection.TOP
+                elif direction == Direction.RIGHT: outputs |= BlockOutputDirection.RIGHT
+                elif direction == Direction.BOTTOM: outputs |= BlockOutputDirection.BOTTOM
+                elif direction == Direction.LEFT: outputs |= BlockOutputDirection.LEFT
+
+            elif tile.rot == TileRotation.LEFT:
+                if direction == Direction.TOP: outputs |= BlockOutputDirection.RIGHT
+                elif direction == Direction.RIGHT: outputs |= BlockOutputDirection.BOTTOM
+                elif direction == Direction.BOTTOM: outputs |= BlockOutputDirection.LEFT
+                elif direction == Direction.LEFT: outputs |= BlockOutputDirection.TOP
+
+            elif tile.rot == TileRotation.BOTTOM:
+                if direction == Direction.TOP: outputs |= BlockOutputDirection.BOTTOM
+                elif direction == Direction.RIGHT: outputs |= BlockOutputDirection.LEFT
+                elif direction == Direction.BOTTOM: outputs |= BlockOutputDirection.TOP
+                elif direction == Direction.LEFT: outputs |= BlockOutputDirection.RIGHT
+
+        return outputs
 
     def __getitem__(self, item: Point2 | tuple[int, int]) -> Optional[Tile | GhostTile]:
         item = Point2.convert(item)

@@ -28,7 +28,7 @@ class TransportBlock(Block):
         super().__init__(name, "distribution", size, cost, output, output_direction, power_consumption)
 
 class Conveyor(Block):
-    def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=0.0, strict=False):
+    def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.FRONT, power_consumption=0.0, strict=False):
         super().__init__(name, "distribution/conveyors", size, cost, output, output_direction, power_consumption)
         self.strict = strict
 
@@ -68,7 +68,53 @@ class Conveyor(Block):
         img = Image.open(self._sprite_path(f"{self.id}-{n}-0")) # second zero is just animation frame; GIFs anyone? :P
         if flip:
             img = img.transpose(flip)
-        return img.rotate(tile.rot.value * 90, expand=True)
+        return img.rotate(tile.rot.value * 90)
+
+class StackConveyor(Block):
+    def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):
+        super().__init__(name, "distribution/stack-conveyors", size, cost, output, output_direction, power_consumption)
+
+    def sprite(self, schematic, tile) -> Image.Image:
+        BOD = BlockOutputDirection
+        inputs = schematic.get_relative_inputs(tile.pos, StackConveyor)
+        outputs = schematic.get_relative_outputs(tile.pos, StackConveyor)
+        input_mask = (BOD.LEFT | BOD.BOTTOM | BOD.RIGHT)
+        output_mask = (BOD.LEFT | BOD.TOP | BOD.RIGHT)
+        n = 0
+
+        first = False
+        if outputs == BOD.NONE: # No outputs - last block
+            n = 2
+        elif inputs & input_mask: # Any input - middle block
+            n = 0
+        elif inputs & input_mask == BOD.NONE: # No input - start block
+            n = 1
+            first = True
+        else: # No match - fallback
+            print(f"ERROR: No 'n' for {tile.pos}")
+            n = 1
+
+        angles = {
+            BOD.TOP: 0,
+            BOD.LEFT: 90,
+            BOD.BOTTOM: 180,
+            BOD.RIGHT: 270
+        }
+
+        img = Image.open(self._sprite_path(f"{self.id}-{n}")).convert("RGBA")
+        edge = Image.open(self._sprite_path(f"{self.id}-edge")).convert("RGBA")
+
+        all_inputs = schematic.get_relative_inputs(tile.pos)
+        for s in (BOD.TOP, BOD.RIGHT, BOD.BOTTOM, BOD.LEFT):
+            if s == BOD.TOP and outputs & BOD.TOP:
+                pass # Skip top if the conveyor isn't the last one
+            elif not ((s & inputs) or (first and (s & all_inputs))):
+                rotated = edge.rotate(angles[s])
+                img.paste(rotated, (0,0), rotated)
+
+        print(f"{tile.pos}\ti={inputs}\to={outputs}\tn={n}")
+        return img.rotate(tile.rot.value * 90)
+
 
 class Sorter(TransportBlock):
     def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):
