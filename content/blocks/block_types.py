@@ -71,7 +71,7 @@ class Conveyor(Block):
         return img.rotate(tile.rot.value * 90)
 
 class StackConveyor(Block):
-    def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):
+    def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.FRONT, power_consumption=0.0):
         super().__init__(name, "distribution/stack-conveyors", size, cost, output, output_direction, power_consumption)
 
     def sprite(self, schematic, tile) -> Image.Image:
@@ -83,7 +83,7 @@ class StackConveyor(Block):
         n = 0
 
         first = False
-        if outputs == BOD.NONE: # No outputs - last block
+        if not outputs & BOD.TOP: # No frontal outputs - last block of the chain
             n = 2
         elif inputs & input_mask: # Any input - middle block
             n = 0

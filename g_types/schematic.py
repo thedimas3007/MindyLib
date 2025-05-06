@@ -11,7 +11,7 @@ from PIL import Image
 from scipy.optimize import direct
 
 from content.blocks import get_block
-from content.blocks.block_types import PowerGenerator, Conveyor
+from content.blocks.block_types import PowerGenerator, Conveyor, StackConveyor
 from .block import BlockOutput, BlockOutputDirection
 from .item_cost import ItemCost
 from .tile import Tile, GhostTile, Direction
@@ -31,6 +31,7 @@ class Schematic: # Read only for now
         self._height = height
         self._tags = tags
         self._tiles = tiles
+        self._update_stacked_convs()
 
     @property
     def version(self) -> int:
@@ -83,6 +84,77 @@ class Schematic: # Read only for now
     @property
     def cost(self) -> ItemCost:
         return reduce(lambda a, b: a + b, (tile.block.cost for tile in self._tiles))
+
+    def _connection_dirs(self, pos: Point2 | tuple[int, int], output_type: BlockOutput, only_type: Optional[type], incoming: bool):
+        pos = Point2.convert(pos)
+        if pos.x < 0 or pos.y < 0 or pos.x >= self.width or pos.y >= self.height:
+            raise ValueError("pos is out of bounds")
+        neighboring_directions = []
+
+        for direction in Direction.all():
+            neighbor_pos = pos + direction.offset
+            if not self.within_bounds(neighbor_pos):
+                continue
+
+            neighbor_tile = self[neighbor_pos]
+            if neighbor_tile is None:
+                continue
+            if output_type & neighbor_tile.block.output == BlockOutput.NONE:
+                continue
+
+            actual_dir = neighbor_tile.rotated_output()
+            target_dir = direction.inverted() if incoming else direction
+            if target_dir in actual_dir and (only_type is None or isinstance(neighbor_tile.block, only_type)):
+                neighboring_directions.append(direction)
+
+        return neighboring_directions
+
+    def _rotated_dirs(self, pos: Point2 | tuple[int, int], only_type: Optional[type], incoming: bool):
+        pos = Point2.convert(pos)
+        if not self.within_bounds(pos):
+            raise ValueError("pos is outside bounds")
+
+        tile = self[pos]
+        if tile is None:
+            return BlockOutputDirection.NONE
+
+        neighbors = self.input_dirs(pos, tile.block.output, only_type) if incoming \
+            else self.output_dirs(pos, tile.block.output, only_type)
+        directions = BlockOutputDirection.NONE
+
+        for direction in neighbors:
+            if tile.rot == TileRotation.RIGHT:
+                if direction == Direction.TOP: directions |= BlockOutputDirection.LEFT
+                elif direction == Direction.RIGHT: directions |= BlockOutputDirection.TOP
+                elif direction == Direction.BOTTOM: directions |= BlockOutputDirection.RIGHT
+                elif direction == Direction.LEFT: directions |= BlockOutputDirection.BOTTOM
+
+            elif tile.rot == TileRotation.UP:
+                if direction == Direction.TOP: directions |= BlockOutputDirection.TOP
+                elif direction == Direction.RIGHT: directions |= BlockOutputDirection.RIGHT
+                elif direction == Direction.BOTTOM: directions |= BlockOutputDirection.BOTTOM
+                elif direction == Direction.LEFT: directions |= BlockOutputDirection.LEFT
+
+            elif tile.rot == TileRotation.LEFT:
+                if direction == Direction.TOP: directions |= BlockOutputDirection.RIGHT
+                elif direction == Direction.RIGHT: directions |= BlockOutputDirection.BOTTOM
+                elif direction == Direction.BOTTOM: directions |= BlockOutputDirection.LEFT
+                elif direction == Direction.LEFT: directions |= BlockOutputDirection.TOP
+
+            elif tile.rot == TileRotation.BOTTOM:
+                if direction == Direction.TOP: directions |= BlockOutputDirection.BOTTOM
+                elif direction == Direction.RIGHT: directions |= BlockOutputDirection.LEFT
+                elif direction == Direction.BOTTOM: directions |= BlockOutputDirection.TOP
+                elif direction == Direction.LEFT: directions |= BlockOutputDirection.RIGHT
+
+        return directions
+
+    def _update_stacked_convs(self):
+        conveyors = list(filter(lambda t: isinstance(t.block, StackConveyor), self._tiles))
+        for conv in conveyors:
+            outputs = self.rotated_outputs(conv.pos, StackConveyor)
+            if not outputs & BlockOutputDirection.TOP: # No frontal outputs - last block of the chain
+                conv.block.output_direction = BlockOutputDirection.ALL
 
     def within_bounds(self, pos: Point2 | tuple[int, int]) -> bool:
         pos = Point2.convert(pos)
@@ -166,75 +238,11 @@ class Schematic: # Read only for now
                 tiles.append((direction, self[new_pos]))
         return tiles
 
-    def _connection_dirs(self, pos: Point2 | tuple[int, int], output_type: BlockOutput, only_type: Optional[type], incoming: bool):
-        pos = Point2.convert(pos)
-        if pos.x < 0 or pos.y < 0 or pos.x >= self.width or pos.y >= self.height:
-            raise ValueError("pos is out of bounds")
-        neighboring_directions = []
-
-        for direction in Direction.all():
-            neighbor_pos = pos + direction.offset
-            if not self.within_bounds(neighbor_pos):
-                continue
-
-            neighbor_tile = self[neighbor_pos]
-            if neighbor_tile is None:
-                continue
-            if output_type & neighbor_tile.block.output == BlockOutput.NONE:
-                continue
-
-            actual_dir = neighbor_tile.rotated_output()
-            target_dir = direction.inverted() if incoming else direction
-            if target_dir in actual_dir and (only_type is None or isinstance(neighbor_tile.block, only_type)):
-                neighboring_directions.append(direction)
-
-        return neighboring_directions
-
     def input_dirs(self, pos: Point2 | tuple[int, int], output_type: BlockOutput, only_type: Optional[type] = None) -> list[Direction]:
         return self._connection_dirs(pos, output_type, only_type, True)
 
     def output_dirs(self, pos: Point2 | tuple[int, int], output_type: BlockOutput, only_type: Optional[type] = None) -> list[Direction]:
         return self._connection_dirs(pos, output_type, only_type, False)
-
-    def _rotated_dirs(self, pos: Point2 | tuple[int, int], only_type: Optional[type], incoming: bool):
-        pos = Point2.convert(pos)
-        if not self.within_bounds(pos):
-            raise ValueError("pos is outside bounds")
-
-        tile = self[pos]
-        if tile is None:
-            return BlockOutputDirection.NONE
-
-        neighbors = self.input_dirs(pos, tile.block.output, only_type) if incoming \
-            else self.output_dirs(pos, tile.block.output, only_type)
-        directions = BlockOutputDirection.NONE
-
-        for direction in neighbors:
-            if tile.rot == TileRotation.RIGHT:
-                if direction == Direction.TOP: directions |= BlockOutputDirection.LEFT
-                elif direction == Direction.RIGHT: directions |= BlockOutputDirection.TOP
-                elif direction == Direction.BOTTOM: directions |= BlockOutputDirection.RIGHT
-                elif direction == Direction.LEFT: directions |= BlockOutputDirection.BOTTOM
-
-            elif tile.rot == TileRotation.UP:
-                if direction == Direction.TOP: directions |= BlockOutputDirection.TOP
-                elif direction == Direction.RIGHT: directions |= BlockOutputDirection.RIGHT
-                elif direction == Direction.BOTTOM: directions |= BlockOutputDirection.BOTTOM
-                elif direction == Direction.LEFT: directions |= BlockOutputDirection.LEFT
-
-            elif tile.rot == TileRotation.LEFT:
-                if direction == Direction.TOP: directions |= BlockOutputDirection.RIGHT
-                elif direction == Direction.RIGHT: directions |= BlockOutputDirection.BOTTOM
-                elif direction == Direction.BOTTOM: directions |= BlockOutputDirection.LEFT
-                elif direction == Direction.LEFT: directions |= BlockOutputDirection.TOP
-
-            elif tile.rot == TileRotation.BOTTOM:
-                if direction == Direction.TOP: directions |= BlockOutputDirection.BOTTOM
-                elif direction == Direction.RIGHT: directions |= BlockOutputDirection.LEFT
-                elif direction == Direction.BOTTOM: directions |= BlockOutputDirection.TOP
-                elif direction == Direction.LEFT: directions |= BlockOutputDirection.RIGHT
-
-        return directions
 
     def rotated_inputs(self, pos: Point2 | tuple[int, int], only_type: Optional[type] = None) -> BlockOutputDirection:
         return self._rotated_dirs(pos, only_type, True)
