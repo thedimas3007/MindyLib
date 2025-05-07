@@ -2,6 +2,8 @@ from PIL import Image
 
 from g_types.tile import TileRotation
 from g_types.block import Block, BlockOutput, BlockOutputDirection
+from utils import add_outline
+
 
 class Pad(Block):
     def __init__(self, name, size, cost, power_consumption=0.0):
@@ -129,6 +131,13 @@ class Sorter(TransportBlock):
         config.paste(sprite, (0, 0), sprite)
         return config
 
+class MassDriver(TransportBlock):
+    def sprite(self, schematic, tile) -> Image.Image:
+        base = Image.open(self._sprite_path(f"{self.id}-base"))
+        top = Image.open(self._sprite_path(f"{self.id}"))
+        top_outlined = add_outline(top, (63, 63, 63), 3)
+        base.paste(top_outlined, (0, 0), top_outlined)
+        return base
 
 class Pump(Block):
     def __init__(self, name, size, cost, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):

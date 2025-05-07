@@ -2,7 +2,7 @@ from enum import IntFlag
 from struct import unpack
 from typing import IO
 
-from PIL import Image, ImageEnhance
+from PIL import Image, ImageEnhance, ImageFilter, ImageChops
 
 from content.items import get_item_by_code
 from content.liquids import get_liquid_by_code
@@ -106,3 +106,13 @@ def paste_opacity(bg: Image.Image, fg: Image.Image, pos: tuple[int, int], opacit
     alpha = ImageEnhance.Brightness(alpha).enhance(opacity)
     fg.putalpha(alpha)
     bg.paste(fg, pos, fg)
+
+def add_outline(image: Image.Image, color: tuple[int, int, int], thickness: int):
+    alpha = image.split()[3]
+    bigger_alpha = alpha.filter(ImageFilter.MaxFilter(thickness * 2 + 1))
+    outline_mask = ImageChops.difference(bigger_alpha, alpha)
+
+    outline = Image.new("RGBA", image.size, (0, 0, 0, 0))
+    outline.paste(color, (0, 0), outline_mask)
+
+    return Image.alpha_composite(outline, image)

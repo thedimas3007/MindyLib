@@ -1,5 +1,5 @@
 from g_types.block import Block, BlockOutput, BlockOutputDirection
-from .block_types import TransportBlock, Conveyor, Sorter, StackConveyor, BridgeConveyor
+from .block_types import TransportBlock, Conveyor, Sorter, StackConveyor, BridgeConveyor, MassDriver
 from .. import items
 
 distribution = "distribution"
@@ -75,7 +75,7 @@ underflow_gate = TransportBlock("Underflow Gate", 1, {
     items.copper: 4
 })
 
-mass_driver = TransportBlock("Mass Driver", 3, {
+mass_driver = MassDriver("Mass Driver", 3, {
     items.titanium: 125,
     items.silicon: 75,
     items.lead: 125,
