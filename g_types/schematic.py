@@ -174,8 +174,13 @@ class Schematic: # Read only for now
             step_x = 1 if pos.x > 0 else -1 if pos.x < 0 else 0
             step_y = 1 if pos.y > 0 else -1 if pos.y < 0 else 0
 
-            bridge_img = Image.open(f"sprites/blocks/distribution/{bridge.block.id}-bridge.png").convert("RGBA")
+            rot = 0 if pos.x != 0 else 90
             pos = Point2(bridge.x + step_x, bridge.y + step_y)
+
+            # TODO: make a function to get sprites
+            bridge_img = Image.open(f"sprites/blocks/distribution/{bridge.block.id}-bridge.png")\
+                .convert("RGBA")\
+                .rotate(rot)
 
             for i in range(dist):
                 if self.within_bounds(pos):

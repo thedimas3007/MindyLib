@@ -98,11 +98,11 @@ def read_obj(stream: IO) -> object:
         raise Exception(f"Unknown object type: {obj_type}")
 
 def paste_opacity(bg: Image.Image, fg: Image.Image, pos: tuple[int, int], opacity=1.0):
-        if opacity < 0 or opacity > 1:
-            raise ValueError("opacity must be >=0 and <=1")
+    if opacity < 0 or opacity > 1:
+        raise ValueError("opacity must be >=0 and <=1")
 
-        fg = fg.convert("RGBA")
-        alpha = fg.split()[3]
-        alpha = ImageEnhance.Brightness(alpha).enhance(opacity)
-        fg.putalpha(alpha)
-        bg.paste(fg, pos, fg)
+    fg = fg.convert("RGBA")
+    alpha = fg.split()[3]
+    alpha = ImageEnhance.Brightness(alpha).enhance(opacity)
+    fg.putalpha(alpha)
+    bg.paste(fg, pos, fg)
