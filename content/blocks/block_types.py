@@ -139,6 +139,51 @@ class MassDriver(TransportBlock):
         base.paste(top_outlined, (0, 0), top_outlined)
         return base
 
+class Duct(Block):
+    def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.FRONT, power_consumption=0.0, strict=False):
+        super().__init__(name, "distribution/ducts", size, cost, output, output_direction, power_consumption)
+        self.strict = strict
+
+    def sprite(self, schematic, tile) -> Image.Image:
+        BOD = BlockOutputDirection
+        inputs = schematic.rotated_inputs(tile.pos, Conveyor if self.strict else None)
+        mask = (BOD.LEFT | BOD.BOTTOM | BOD.RIGHT)
+
+        n = 0
+        flip = None
+
+        if inputs & BOD.LEFT:
+            if inputs & BOD.RIGHT:
+                if inputs & BOD.BOTTOM:
+                    n = 3  # LEFT + RIGHT + BOTTOM
+                else:
+                    n = 4  # LEFT + RIGHT
+            elif inputs & BOD.BOTTOM:
+                n = 2
+                flip = Image.FLIP_TOP_BOTTOM  # LEFT + BOTTOM
+            else:
+                n = 1  # LEFT only
+
+        elif inputs & BOD.RIGHT:
+            if inputs & BOD.BOTTOM:
+                n = 2  # RIGHT + BOTTOM
+            else:
+                n = 1
+                flip = Image.FLIP_TOP_BOTTOM  # RIGHT only
+
+        elif (inputs & (BOD.LEFT | BOD.RIGHT)) == BOD.NONE:
+            n = 0
+
+        else:
+            print(f"ERROR: No 'n' for {tile.pos}")
+        # print(f"{tile.pos}:\ti={inputs}\tn={n}")
+        img = Image.open(self._sprite_path(f"{self.id}-bottom-{n}"))
+        top = Image.open(self._sprite_path(f"{self.id}-top-{n}"))
+        img.paste(top, (0,0), top)
+        if flip:
+            img = img.transpose(flip)
+        return img.rotate(tile.rot.value * 90)
+
 class Pump(Block):
     def __init__(self, name, size, cost, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):
         super().__init__(name, "liquid", size, cost, output, output_direction, power_consumption)

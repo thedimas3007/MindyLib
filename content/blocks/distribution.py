@@ -1,5 +1,5 @@
 from g_types.block import Block, BlockOutput, BlockOutputDirection
-from .block_types import TransportBlock, Conveyor, Sorter, StackConveyor, BridgeConveyor, MassDriver
+from .block_types import TransportBlock, Conveyor, Sorter, StackConveyor, BridgeConveyor, MassDriver, Duct
 from .. import items
 
 distribution = "distribution"
@@ -82,15 +82,15 @@ mass_driver = MassDriver("Mass Driver", 3, {
     items.thorium: 50
 }, power_consumption=1.75)
 
-duct = TransportBlock("Duct", 1, {
+duct = Duct("Duct", 1, {
     items.graphite: 5,
     items.metaglass: 2
 }, output_direction=BlockOutputDirection.FRONT)
 
-armored_duct = TransportBlock("Armored Duct", 1, {
+armored_duct = Duct("Armored Duct", 1, {
     items.beryllium: 2,
     items.tungsten: 1
-}, output_direction=BlockOutputDirection.FRONT)
+}, output_direction=BlockOutputDirection.FRONT, strict=True)
 
 duct_router = TransportBlock("Duct Router", 1, {
     items.graphite: 10,
