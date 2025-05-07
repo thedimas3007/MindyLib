@@ -184,6 +184,17 @@ class Duct(Block):
             img = img.transpose(flip)
         return img.rotate(tile.rot.value * 90)
 
+class FlowDuct(Block): # Overflow/Underflow ducts
+    def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):
+        super().__init__(name, "distribution/ducts", size, cost, output, output_direction, power_consumption)
+
+    def sprite(self, schematic, tile) -> Image.Image:
+        img = get_sprite(self.category, self.id)
+        top = get_sprite(self.category, f"{self.id}-top")
+        top = top.rotate(tile.rot.value * 90)
+        img.paste(top, (0,0), top)
+        return img
+
 class Pump(Block):
     def __init__(self, name, size, cost, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):
         super().__init__(name, "liquid", size, cost, output, output_direction, power_consumption)

@@ -19,6 +19,9 @@ Python-based parser for Mindustry schematics and maps. WIP
   * [ ] ~~Colorful output of tests~~
   * [ ] Comprehensive documentation
   * [ ] Mod support as some sort of "plugin"
+  * [ ] Make layer rendering system
+    * RotatedLayer, TintedLayer, etc
+    * So that I won't have to reimplement many block 
 
 * **Rendering implementation progress**
   * [x] Campaign
