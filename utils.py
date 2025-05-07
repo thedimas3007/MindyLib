@@ -116,3 +116,6 @@ def add_outline(image: Image.Image, color: tuple[int, int, int], thickness: int)
     outline.paste(color, (0, 0), outline_mask)
 
     return Image.alpha_composite(outline, image)
+
+def get_sprite(category: str, name: str):
+    return Image.open(f"sprites/blocks/{category}/{name}.png").convert("RGBA")

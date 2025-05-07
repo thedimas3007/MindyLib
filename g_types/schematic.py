@@ -17,7 +17,7 @@ from .item_cost import ItemCost
 from .tile import Tile, GhostTile, Direction
 from .point2 import Point2
 from .tile import TileRotation
-from utils import JavaTypes, read_num, read_utf, read_obj, paste_opacity
+from utils import JavaTypes, read_num, read_utf, read_obj, paste_opacity, get_sprite
 
 
 class Schematic: # Read only for now
@@ -178,8 +178,7 @@ class Schematic: # Read only for now
             pos = Point2(bridge.x + step_x, bridge.y + step_y)
 
             # TODO: make a function to get sprites
-            bridge_img = Image.open(f"sprites/blocks/distribution/{bridge.block.id}-bridge.png")\
-                .convert("RGBA")\
+            bridge_img = get_sprite("distribution", f"{bridge.block.id}-bridge")\
                 .rotate(rot)
 
             for i in range(dist):

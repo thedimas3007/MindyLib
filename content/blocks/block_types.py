@@ -2,7 +2,7 @@ from PIL import Image
 
 from g_types.tile import TileRotation
 from g_types.block import Block, BlockOutput, BlockOutputDirection
-from utils import add_outline
+from utils import add_outline, get_sprite
 
 
 class Pad(Block):
@@ -67,7 +67,7 @@ class Conveyor(Block):
         else:
             print(f"ERROR: No 'n' for {tile.pos}")
         # print(f"{tile.pos}:\ti={inputs}\tn={n}")
-        img = Image.open(self._sprite_path(f"{self.id}-{n}-0")) # second zero is just animation frame; GIFs anyone? :P
+        img = get_sprite(self.category, f"{self.id}-{n}-0")  # second zero is just animation frame; GIFs anyone? :P
         if flip:
             img = img.transpose(flip)
         return img.rotate(tile.rot.value * 90)
@@ -103,8 +103,8 @@ class StackConveyor(Block):
             BOD.RIGHT: 270
         }
 
-        img = Image.open(self._sprite_path(f"{self.id}-{n}")).convert("RGBA")
-        edge = Image.open(self._sprite_path(f"{self.id}-edge")).convert("RGBA")
+        img = get_sprite(self.category, f"{self.id}-{n}")
+        edge = get_sprite(self.category, f"{self.id}-edge")
 
         all_inputs = schematic.rotated_inputs(tile.pos)
         for s in (BOD.TOP, BOD.RIGHT, BOD.BOTTOM, BOD.LEFT):
@@ -125,16 +125,16 @@ class Sorter(TransportBlock):
         super().__init__(name, size, cost, output, output_direction, power_consumption)
 
     def sprite(self, schematic, tile) -> Image.Image:
-        config = Image.open(self._sprite_path(f"cross-full")) if not tile.config else \
+        config = get_sprite(self.category, "cross-full") if not tile.config else \
             Image.new("RGBA", (32,32), tile.config.tuple_color)
-        sprite = Image.open(self._sprite_path())
+        sprite = get_sprite(self.category, self.id)
         config.paste(sprite, (0, 0), sprite)
         return config
 
 class MassDriver(TransportBlock):
     def sprite(self, schematic, tile) -> Image.Image:
-        base = Image.open(self._sprite_path(f"{self.id}-base"))
-        top = Image.open(self._sprite_path(f"{self.id}"))
+        base = get_sprite(self.category, f"{self.id}-base")
+        top = get_sprite(self.category, self.id)
         top_outlined = add_outline(top, (63, 63, 63), 3)
         base.paste(top_outlined, (0, 0), top_outlined)
         return base
@@ -177,8 +177,8 @@ class Duct(Block):
         else:
             print(f"ERROR: No 'n' for {tile.pos}")
         # print(f"{tile.pos}:\ti={inputs}\tn={n}")
-        img = Image.open(self._sprite_path(f"{self.id}-bottom-{n}"))
-        top = Image.open(self._sprite_path(f"{self.id}-top-{n}"))
+        img = get_sprite(self.category, f"{self.id}-bottom-{n}")
+        top = get_sprite(self.category, f"{self.id}-top-{n}")
         img.paste(top, (0,0), top)
         if flip:
             img = img.transpose(flip)

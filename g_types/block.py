@@ -2,6 +2,7 @@ from enum import Flag, auto
 from typing import Optional
 from PIL import Image
 
+from utils import get_sprite
 from .item import Item
 from .item_cost import ItemCost
 # from .schematic import Schematic
@@ -38,11 +39,8 @@ class Block:
     def energy_usage(self) -> float:
         return self.power_consumption * 60
 
-    def _sprite_path(self, name: Optional[str] = None) -> str: # Maybe I should move it to another place
-        return f"sprites/blocks/{self.category}/{name or self.id}.png"
-
     def sprite(self, schematic, tile) -> Image.Image:
-        return Image.open(self._sprite_path())
+        return get_sprite(self.category, self.id)
 
     def __str__(self):
         return f"Block(\"{self.name}\", \"{self.category}\", {self.size}, {self.cost}, {self.output}, {self.output_direction}, {self.power_consumption})"
