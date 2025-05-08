@@ -2,7 +2,7 @@ from enum import IntFlag
 from struct import unpack
 from typing import IO
 
-from PIL import Image, ImageEnhance, ImageFilter, ImageChops
+from PIL import Image, ImageEnhance, ImageFilter, ImageChops, ImageOps
 
 from content.items import get_item_by_code
 from content.liquids import get_liquid_by_code
@@ -117,26 +117,20 @@ def add_outline(image: Image.Image, color: tuple[int, int, int], thickness: int)
 
     return Image.alpha_composite(outline, image)
 
-from PIL import Image, ImageOps
-
 def tint_image(image: Image.Image, color: tuple[int, int, int] | int) -> Image.Image:
     if isinstance(color, int):
         color = (color >> 16, color >> 8 & 0xff, color & 0xff)
-
     image = image.convert("RGBA")
-    grayscale = ImageOps.grayscale(image)
-    tinted = Image.new("RGBA", image.size)
-
+    pixels = image.load()
     for y in range(image.height):
         for x in range(image.width):
-            a = image.getpixel((x, y))[3]
-            brightness = grayscale.getpixel((x, y)) / 255
-            r = int(color[0] * brightness)
-            g = int(color[1] * brightness)
-            b = int(color[2] * brightness)
-            tinted.putpixel((x, y), (r, g, b, a))
-
-    return tinted
+            r, g, b, a = pixels[x, y]
+            if a > 0:
+                r *= color[0] / 255
+                g *= color[1] / 255
+                b *= color[2] / 255
+                pixels[x, y] = tuple(map(int, (r, g, b, a)))
+    return image
 
 def get_sprite(category: str, name: str):
     return Image.open(f"sprites/blocks/{category}/{name}.png").convert("RGBA")

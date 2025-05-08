@@ -4,6 +4,7 @@ from g_types.tile import TileRotation
 from g_types.block import Block, BlockOutput, BlockOutputDirection
 from utils import add_outline, get_sprite, tint_image
 
+_sharded_color = (0xff, 0xd2, 0x7e)
 
 class Pad(Block):
     def __init__(self, name, size, cost, power_consumption=0.0):
@@ -13,6 +14,24 @@ class StorageBlock(Block):
     def __init__(self, name, size, cost, output=BlockOutput.NONE, output_direction=BlockOutputDirection.NONE, power_consumption=0):
         super().__init__(name, "storage", size, cost, output, output_direction, power_consumption)
 
+    def sprite(self, schematic, tile) -> Image.Image:
+        img = get_sprite(self.category, self.id)
+        team = tint_image(get_sprite(self.category, f"{self.id}-team"), _sharded_color)
+        img.paste(team, (0,0), team)
+        return img
+
+class Unloader(Block):
+    def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=0):
+        super().__init__(name, "storage", size, cost, output, output_direction, power_consumption)
+
+    def sprite(self, schematic, tile) -> Image.Image:
+        img = get_sprite(self.category, self.id)
+        if tile.config:
+            config = tint_image(get_sprite(self.category, f"{self.id}-center"), tile.config.color)
+            img.paste(config, (0,0), config)
+        return img
+
+
 class GenericCrafter(Block):
     def __init__(self, name, size, cost, output=BlockOutput.NONE, output_direction=BlockOutputDirection.NONE, power_consumption=0):
         super().__init__(name, "production", size, cost, output, output_direction, power_consumption)
@@ -20,6 +39,27 @@ class GenericCrafter(Block):
 class DefenseBlock(Block):
     def __init__(self, name, size, cost, output=BlockOutput.NONE, output_direction=BlockOutputDirection.NONE, power_consumption=0.0, category="defense"):
         super().__init__(name, category, size, cost, output, output_direction, power_consumption)
+
+class DefenseTeamBlock(DefenseBlock):
+    def sprite(self, schematic, tile) -> Image.Image:
+        img = get_sprite(self.category, self.id)
+        team = tint_image(get_sprite(self.category, f"{self.id}-team"), _sharded_color)
+        img.paste(team, (0,0), team)
+        return img
+
+class DefenseBasedBlock(DefenseBlock):
+    def sprite(self, schematic, tile) -> Image.Image:
+        img = get_sprite(self.category, f"{self.id}-base")
+        top = get_sprite(self.category, self.id)
+        img.paste(top, (0,0), top)
+        return img
+
+class RegenProjector(DefenseBlock):
+    def sprite(self, schematic, tile) -> Image.Image:
+        img = get_sprite(self.category, f"{self.id}-bottom")
+        top = get_sprite(self.category, self.id)
+        img.paste(top, (0,0), top)
+        return img
 
 class Wall(DefenseBlock):
     def __init__(self, name, size, cost, output=BlockOutput.NONE, output_direction=BlockOutputDirection.NONE, power_consumption=0.0):

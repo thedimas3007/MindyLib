@@ -1,5 +1,5 @@
 from g_types.block import Block, BlockOutput, BlockOutputDirection
-from .block_types import DefenseBlock, StorageBlock
+from .block_types import DefenseBlock, StorageBlock, DefenseTeamBlock, DefenseBasedBlock, RegenProjector, Unloader
 from .. import items
 
 category = "storage"
@@ -30,7 +30,7 @@ overdrive_dome = DefenseBlock("Overdrive Dome", 3, {
     items.surge_alloy: 120
 }, power_consumption=10.0)
 
-force_projector = DefenseBlock("Force Projector", 3, {
+force_projector = DefenseTeamBlock("Force Projector", 3, {
     items.lead: 100,
     items.titanium: 75,
     items.silicon: 125
@@ -41,19 +41,19 @@ shock_mine = DefenseBlock("Shock Mine", 1, {
     items.silicon: 12
 })
 
-radar = DefenseBlock("Radar", 1, {
+radar = DefenseBasedBlock("Radar", 1, {
     items.silicon: 60,
     items.graphite: 50,
     items.beryllium: 10
 }, power_consumption=0.6)
 
-build_tower = DefenseBlock("Build Tower", 3, {
+build_tower = DefenseBasedBlock("Build Tower", 3, {
     items.silicon: 150,
     items.oxide: 40,
     items.thorium: 60
 }, power_consumption=3)
 
-regen_projector = DefenseBlock("Regen Projector", 3, {
+regen_projector = RegenProjector("Regen Projector", 3, {
     items.silicon: 80,
     items.tungsten: 60,
     items.oxide: 40,
@@ -114,10 +114,10 @@ vault = StorageBlock("Vault", 3, {
     items.thorium: 125
 })
 
-unloader = Block("Unloader", category, 1, {
+unloader = Unloader("Unloader", 1, {
     items.titanium: 25,
     items.silicon: 30
-}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL)
+})
 
 reinforced_container = StorageBlock("Reinforced Container", 2, {
     items.tungsten: 30,
