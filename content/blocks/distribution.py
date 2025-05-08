@@ -1,6 +1,6 @@
 from g_types.block import Block, BlockOutput, BlockOutputDirection
 from .block_types import TransportBlock, Conveyor, Sorter, StackConveyor, BridgeConveyor, MassDriver, Duct, FlowDuct, \
-    DuctRouter
+    DuctRouter, CargoUnloadPoint, DuctUnloader
 from .. import items
 
 distribution = "distribution"
@@ -113,7 +113,7 @@ duct_bridge = TransportBlock("Duct Bridge", 1, {
     items.metaglass: 8
 }, output_direction=BlockOutputDirection.FRONT)
 
-duct_unloader = TransportBlock("Duct Unloader", 1, {
+duct_unloader = DuctUnloader("Duct Unloader", 1, {
     items.graphite: 20,
     items.silicon: 20,
     items.tungsten: 10
@@ -135,10 +135,10 @@ unit_cargo_loader = Block("Unit Cargo Loader", unit_category, 3, {
     items.oxide: 20
 }, power_consumption=8/60)
 
-unit_cargo_unload_point = Block("Unit Cargo Unload Point", unit_category, 2, {
+unit_cargo_unload_point = CargoUnloadPoint("Unit Cargo Unload Point", 2, {
     items.silicon: 60,
     items.tungsten: 60
-}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL)
+})
 
 all_blocks = [
     conveyor, titanium_conveyor, plastanium_conveyor, armored_conveyor,

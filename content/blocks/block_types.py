@@ -207,6 +207,35 @@ class FlowDuct(Block): # Overflow/Underflow ducts
         img.paste(top, (0,0), top)
         return img
 
+class DuctUnloader(Block):
+    def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.FRONT, power_consumption=0.0):
+        super().__init__(name, "distribution/ducts", size, cost, output, output_direction, power_consumption)
+
+    def sprite(self, schematic, tile) -> Image.Image:
+        img = get_sprite(self.category, self.id)
+        config = tint_image(get_sprite(self.category, f"{self.id}-center"), tile.config.color) if tile.config else \
+            get_sprite(self.category, f"{self.id}-arrow")
+        top = get_sprite(self.category, f"{self.id}-top")
+        config = config.rotate(tile.rot.value * 90)
+        img.paste(config, (0,0), config)
+        top = top.rotate(tile.rot.value * 90)
+        img.paste(top, (0,0), top)
+        return img
+
+
+class CargoUnloadPoint(Block):
+    def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):
+        super().__init__(name, "units", size, cost, output, output_direction, power_consumption)
+
+    def sprite(self, schematic, tile) -> Image.Image:
+        img = get_sprite(self.category, self.id)
+        top = tint_image(get_sprite(self.category, f"{self.id}-top"), tile.config.color) if tile.config else None
+        if top:
+            top.rotate(tile.rot.value * 90)
+            img.paste(top, (0,0), top)
+        return img
+
+
 class Pump(Block):
     def __init__(self, name, size, cost, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):
         super().__init__(name, "liquid", size, cost, output, output_direction, power_consumption)
