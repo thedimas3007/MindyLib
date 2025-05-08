@@ -235,6 +235,17 @@ class CargoUnloadPoint(Block):
             img.paste(top, (0,0), top)
         return img
 
+class DuctBridge(Block):
+    def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.FRONT, power_consumption=0.0, max_range=0):
+        super().__init__(name, "distribution/ducts", size, cost, output, output_direction, power_consumption)
+        self.max_range = max_range
+
+    def sprite(self, schematic, tile) -> Image.Image:
+        img = get_sprite(self.category, self.id)
+        top = get_sprite(self.category, f"{self.id}-dir")
+        top = top.rotate(tile.rot.value * 90)
+        img.paste(top, (0,0), top)
+        return img
 
 class Pump(Block):
     def __init__(self, name, size, cost, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):

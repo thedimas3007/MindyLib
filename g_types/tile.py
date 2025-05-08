@@ -41,6 +41,21 @@ class Direction(Enum):
             Direction.RIGHT: Direction.LEFT,
         }[self]
 
+    def is_horizontal(self) -> bool:
+        return self in [Direction.LEFT, Direction.RIGHT]
+
+    def is_vertical(self) -> bool:
+        return self in [Direction.TOP, Direction.BOTTOM]
+
+    @staticmethod
+    def from_rotation(rotation: TileRotation):
+        return {
+            TileRotation.UP: Direction.TOP,
+            TileRotation.BOTTOM: Direction.BOTTOM,
+            TileRotation.LEFT: Direction.LEFT,
+            TileRotation.RIGHT: Direction.RIGHT,
+        }[rotation]
+
     @staticmethod
     def all() -> list["Direction"]:
         return list(Direction)

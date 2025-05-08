@@ -8,10 +8,9 @@ from os import PathLike
 from typing import IO, BinaryIO, Optional
 
 from PIL import Image, ImageEnhance
-from scipy.optimize import direct
 
 from content.blocks import get_block
-from content.blocks.block_types import PowerGenerator, Conveyor, StackConveyor, BridgeConveyor
+from content.blocks.block_types import PowerGenerator, Conveyor, StackConveyor, BridgeConveyor, DuctBridge
 from .block import BlockOutput, BlockOutputDirection
 from .item_cost import ItemCost
 from .tile import Tile, GhostTile, Direction
@@ -150,14 +149,14 @@ class Schematic: # Read only for now
         return directions
 
     def _update_stacked_convs(self):
-        conveyors: list[Tile] = list(filter(lambda t: isinstance(t.block, StackConveyor), self._tiles))
+        conveyors: list[Tile] = [tile for tile in self._tiles if isinstance(tile.block, StackConveyor)]
         for conv in conveyors:
             outputs = self.rotated_outputs(conv.pos, StackConveyor)
             if not outputs & BlockOutputDirection.TOP: # No frontal outputs - last block of the chain
                 conv.block.output_direction = BlockOutputDirection.ALL
 
     def _render_bridges(self, image: Image.Image, opacity=0.8):
-        bridges: list[Tile] = list(filter(lambda t: isinstance(t.block, BridgeConveyor), self._tiles))
+        bridges: list[Tile] = [tile for tile in self._tiles if isinstance(tile.block, BridgeConveyor)]
 
         for bridge in bridges:
             pos = Point2.convert(bridge.config)
@@ -187,6 +186,48 @@ class Schematic: # Read only for now
 
                 pos = Point2(pos.x + step_x, pos.y + step_y)
 
+    def _render_duct_bridges(self, image: Image.Image, opacity=0.8):
+        def next_bridge(current: Tile) -> tuple[int, Optional[Tile]]:
+            block: DuctBridge = current.block
+            direction = Direction.from_rotation(current.rot)
+            x, y = current.pos.x, current.pos.y
+            dx, dy = direction.offset
+
+            for dist in range(block.max_range):
+                x += dx
+                y += dy
+                if not self.within_bounds((x, y)):
+                    return 0, None
+                tile = self[x,y]
+                if not tile:
+                    continue
+                if isinstance(tile.block, DuctBridge):
+                    return dist, tile
+            return 0, None
+
+
+        bridges: list[Tile] = [tile for tile in self._tiles if isinstance(tile.block, DuctBridge)]
+
+        for bridge in bridges:
+            bridge_img = get_sprite("distribution/ducts", f"{bridge.block.id}-bridge") \
+                .rotate(bridge.rot.value * 90)
+            dist, next_one = next_bridge(bridge)
+            if dist == 0 or not next_one:
+                continue
+
+            if bridge.x == next_one.x:
+                first = min(bridge.y, next_one.y)
+                last = max(bridge.y, next_one.y)
+                x = bridge.x
+                for y in range(first+1, last):
+                    paste_opacity(image, bridge_img, (x * 32, (self._height - y) * 32 - bridge_img.height), opacity)
+            elif bridge.y == next_one.y:
+                first = min(bridge.x, next_one.x)
+                last = max(bridge.x, next_one.x)
+                y = bridge.y
+                for x in range(first+1, last):
+                    paste_opacity(image, bridge_img, (x * 32, (self._height - y) * 32 - bridge_img.height), opacity)
+
     def within_bounds(self, pos: Point2 | tuple[int, int]) -> bool:
         pos = Point2.convert(pos)
         return 0 <= pos.x < self._width and 0 <= pos.y < self._height
@@ -209,6 +250,7 @@ class Schematic: # Read only for now
 
             preview.paste(block_img, (x_pos, flipped_y))
         self._render_bridges(preview)
+        self._render_duct_bridges(preview)
         preview.save(filename)
 
     def render_canvases(self) -> None:

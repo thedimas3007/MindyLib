@@ -21,14 +21,16 @@ Python-based parser for Mindustry schematics and maps. WIP
   * [ ] Mod support as some sort of "plugin"
   * [ ] Make layer rendering system
     * RotatedLayer, TintedLayer, etc
-    * So that I won't have to reimplement many block 
+    * So that I won't have to reimplement many block
+  * [ ] Add Generic block type for `Tile` for better typing
+    * `Tile[DuctBridge]`
 
 * **Rendering implementation progress**
   * [x] Campaign
   * [ ] Core
   * [ ] Crafting
   * [ ] Defense
-  * [ ] Distribution | *WIP*
+  * [x] Distribution
   * [ ] Experiment
   * [ ] Liquid
   * [ ] Logic
