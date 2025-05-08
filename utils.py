@@ -117,5 +117,26 @@ def add_outline(image: Image.Image, color: tuple[int, int, int], thickness: int)
 
     return Image.alpha_composite(outline, image)
 
+from PIL import Image, ImageOps
+
+def tint_image(image: Image.Image, color: tuple[int, int, int] | int) -> Image.Image:
+    if isinstance(color, int):
+        color = (color >> 16, color >> 8 & 0xff, color & 0xff)
+
+    image = image.convert("RGBA")
+    grayscale = ImageOps.grayscale(image)
+    tinted = Image.new("RGBA", image.size)
+
+    for y in range(image.height):
+        for x in range(image.width):
+            a = image.getpixel((x, y))[3]
+            brightness = grayscale.getpixel((x, y)) / 255
+            r = int(color[0] * brightness)
+            g = int(color[1] * brightness)
+            b = int(color[2] * brightness)
+            tinted.putpixel((x, y), (r, g, b, a))
+
+    return tinted
+
 def get_sprite(category: str, name: str):
     return Image.open(f"sprites/blocks/{category}/{name}.png").convert("RGBA")

@@ -2,7 +2,7 @@ from PIL import Image
 
 from g_types.tile import TileRotation
 from g_types.block import Block, BlockOutput, BlockOutputDirection
-from utils import add_outline, get_sprite
+from utils import add_outline, get_sprite, tint_image
 
 
 class Pad(Block):
@@ -183,6 +183,18 @@ class Duct(Block):
         if flip:
             img = img.transpose(flip)
         return img.rotate(tile.rot.value * 90)
+
+class DuctRouter(Block):
+    def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):
+        super().__init__(name, "distribution/ducts", size, cost, output, output_direction, power_consumption)
+
+    def sprite(self, schematic, tile) -> Image.Image:
+        img = get_sprite(self.category, self.id)
+        top = tint_image(get_sprite("distribution", "center"), tile.config.color) if tile.config else \
+            get_sprite(self.category, f"{self.id}-top")
+        top = top.rotate(tile.rot.value * 90)
+        img.paste(top, (0,0), top)
+        return img
 
 class FlowDuct(Block): # Overflow/Underflow ducts
     def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):

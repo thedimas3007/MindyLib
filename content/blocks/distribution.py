@@ -1,5 +1,6 @@
 from g_types.block import Block, BlockOutput, BlockOutputDirection
-from .block_types import TransportBlock, Conveyor, Sorter, StackConveyor, BridgeConveyor, MassDriver, Duct, FlowDuct
+from .block_types import TransportBlock, Conveyor, Sorter, StackConveyor, BridgeConveyor, MassDriver, Duct, FlowDuct, \
+    DuctRouter
 from .. import items
 
 distribution = "distribution"
@@ -92,7 +93,7 @@ armored_duct = Duct("Armored Duct", 1, {
     items.tungsten: 1
 }, output_direction=BlockOutputDirection.FRONT, strict=True)
 
-duct_router = TransportBlock("Duct Router", 1, {
+duct_router = DuctRouter("Duct Router", 1, {
     items.graphite: 10,
     items.metaglass: 4
 })
@@ -123,7 +124,7 @@ surge_conveyor = StackConveyor("Surge Conveyor", 1, {
     items.tungsten: 1
 }, output_direction=BlockOutputDirection.FRONT, power_consumption=1/60)
 
-surge_router = TransportBlock("Surge Router", 1, {
+surge_router = DuctRouter("Surge Router", 1, {
     items.surge_alloy: 5,
     items.tungsten: 1
 }, power_consumption=3/60)
