@@ -1,5 +1,6 @@
 from string_utils import space_to_kebab
 
+
 class Item:
     def __init__(self, name: str, color: int):
         self.id = space_to_kebab(name)
@@ -7,8 +8,8 @@ class Item:
         self.color = color
 
     @property
-    def tuple_color(self) -> tuple[int, ...]:
-        return self.color >> 16, (self.color >> 8) & 0xFF, self.color & 0xFF, 255
+    def tuple_color(self) -> tuple[int, int, int, int]:
+        return self.color >> 16, self.color >> 8 & 0xff, self.color & 0xff, 255
 
     def __hash__(self):
         return hash(self.id)

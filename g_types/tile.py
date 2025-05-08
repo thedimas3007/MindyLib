@@ -9,6 +9,14 @@ class TileRotation(Flag):
     LEFT = 2
     BOTTOM = 3
 
+    def __add__(self, other):
+        if isinstance(other, TileRotation):
+            return TileRotation.from_int((self.value + other.value) % 4)
+        elif isinstance(other, int):
+            return TileRotation.from_int((self.value + other) % 4)
+        else:
+            raise TypeError("other must be of type TileRotation")
+
     @staticmethod
     def from_int(i):
         if i == 0:

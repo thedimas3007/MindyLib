@@ -97,6 +97,10 @@ def read_obj(stream: IO) -> object:
     else:
         raise Exception(f"Unknown object type: {obj_type}")
 
+def parse_color(color: int) -> tuple[int, int, int]:
+    color &= 0xffffff # Clean color from any other bits
+    return color >> 16, color >> 8 & 0xff, color & 0xff
+
 def paste_opacity(bg: Image.Image, fg: Image.Image, pos: tuple[int, int], opacity=1.0):
     if opacity < 0 or opacity > 1:
         raise ValueError("opacity must be >=0 and <=1")
@@ -119,7 +123,7 @@ def add_outline(image: Image.Image, color: tuple[int, int, int], thickness: int)
 
 def tint_image(image: Image.Image, color: tuple[int, int, int] | int) -> Image.Image:
     if isinstance(color, int):
-        color = (color >> 16, color >> 8 & 0xff, color & 0xff)
+        color = parse_color(color)
     image = image.convert("RGBA")
     pixels = image.load()
     for y in range(image.height):

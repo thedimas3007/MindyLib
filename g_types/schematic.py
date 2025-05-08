@@ -16,7 +16,7 @@ from .item_cost import ItemCost
 from .tile import Tile, GhostTile, Direction
 from .point2 import Point2
 from .tile import TileRotation
-from utils import JavaTypes, read_num, read_utf, read_obj, paste_opacity, get_sprite
+from utils import JavaTypes, read_num, read_utf, read_obj, paste_opacity, get_sprite, parse_color
 
 
 class Schematic: # Read only for now
@@ -274,7 +274,7 @@ class Schematic: # Read only for now
                     offset = i * bpp
                     index = get_byte(tile.config, offset)
                     color = colors[index]
-                    img.putpixel((i % 12, i // 12), (color >> 16, (color >> 8) & 0xFF, color & 0xFF)) # hex is BGR whilst PIL uses RGB
+                    img.putpixel((i % 12, i // 12), parse_color(color)) # hex is BGR whilst PIL uses RGB
                 img.save(f"canvas-{n_canvas}.png")
                 n_canvas += 1
 
