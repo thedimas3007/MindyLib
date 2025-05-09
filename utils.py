@@ -101,6 +101,9 @@ def parse_color(color: int) -> tuple[int, int, int]:
     color &= 0xffffff # Clean color from any other bits
     return color >> 16, color >> 8 & 0xff, color & 0xff
 
+def pack_color(r: int, g: int, b: int) -> int:
+    return r << 16 | g << 8 | b
+
 def paste_opacity(bg: Image.Image, fg: Image.Image, pos: tuple[int, int], opacity=1.0):
     if opacity < 0 or opacity > 1:
         raise ValueError("opacity must be >=0 and <=1")

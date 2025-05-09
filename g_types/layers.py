@@ -4,9 +4,12 @@ from PIL import Image
 
 import g_types # Not importing schematic directly in order to avoid circular import
 from g_types.tile import Tile, TileRotation
-from utils import get_sprite, tint_image, add_outline, parse_color
+from utils import get_sprite, tint_image, add_outline, parse_color, pack_color
 
-LayerLike: TypeAlias = Union[tuple[str, str], Image.Image, "Layer"]
+LayerLike: TypeAlias = Union[str | tuple[str, str], Image.Image, "Layer"]
+
+# Support for per-team rendering eventually?
+team_colors = [0xffd37f, 0xeab678, 0xd4816b]
 
 class Layer:
     def __init__(self, layer: LayerLike) -> None:
@@ -21,9 +24,15 @@ class Layer:
             return layer
         elif isinstance(layer, Layer):
             return layer.render(schematic, tile)
-        cat, name = layer
-        name = name.replace("%id%", tile.block.id)
-        return get_sprite(cat, name)
+        elif isinstance(layer, tuple):
+            cat, name = layer
+            name = name.replace("@", tile.block.id, 1)
+            return get_sprite(cat, name)
+        elif isinstance(layer, str):
+            name = layer.replace("@", tile.block.id, 1)
+            return get_sprite(tile.block.category, name)
+        else:
+            raise TypeError(f"unknown layer type: {type(layer)}")
 
 class EmptyLayer(Layer):
     def __init__(self):
@@ -72,6 +81,26 @@ class OutlinedLayer(Layer):
         img = Layer.convert(self.layer, schematic, tile)
         return add_outline(img, self.color, self.thickness)
 
+class TeamLayer(Layer):
+    def render(self, schematic: g_types.schematic.Schematic, tile: Tile) -> Image.Image:
+        img = Layer.convert(self.layer, schematic, tile)
+        tinted = Image.new("RGBA", img.size, (0, 0, 0, 0))
+        pixels = img.load()
+        for y in range(img.height):
+            for x in range(img.width):
+                tint_color = pixels[x, y]
+                r, g, b, a = pixels[x, y]
+                color = pack_color(r, g, b)
+                if color == 0xffffff:
+                    tint_color = parse_color(team_colors[0])
+                elif color in [0xdcc6c6, 0xdbc5c5]:
+                    tint_color = parse_color(team_colors[1])
+                elif color in [0x9d7f7f, 0x9e8080]:
+                    tint_color = parse_color(team_colors[2])
+                tinted.putpixel((x, y), tint_color)
+        return tinted
+
+
 class LayeredBlock:
     def __init__(self, layers: list[Layer]):
         self.layers = layers
@@ -88,18 +117,29 @@ class LayeredBlock:
 # TODO: ConveyorLayer ??
 
 # mass_driver = LayeredBlock([
-#     Layer(("distribution", "%id%-base")),
-#     OutlinedLayer(("distribution", "%id%"), 0x3f3f3f, 3)
+#     Layer(("distribution", "@-base")),
+#     OutlinedLayer(("distribution", "@"), 0x3f3f3f, 3)
 # ])
 #
 # sorter = LayeredBlock([
 #     ItemConfigLayer(),
-#     Layer(("distribution", "%id%")),
+#     Layer(("distribution", "@")),
 # ])
 #
 # uduct_unloader = LayeredBlock([
-#     Layer(("distribution/ducts", "%id%")),
-#     ItemTintedLayer(("distribution/ducts", f"%id%-center")),
-#     RotatedLayer(("distribution/ducts", f"%id%-top"))
+#     Layer(("distribution/ducts", "@")),
+#     ItemTintedLayer(("distribution/ducts", f"@-center")),
+#     RotatedLayer(("distribution/ducts", f"@-top"))
 # ])
-
+#
+# uelectrolyzer = LayeredBlock([
+#     Layer("@-bottom"),
+#     Layer("@"),
+#     RotatedLayer("@-ozone-output1", "@-ozone-output2", 1),
+#     RotatedLayer("@-hydrogen-output1", "@-hydrogen-output2", 3)
+# ])
+#
+# ucore = LayeredBlock([
+#     Layer("@"),
+#     TeamLayer("@-te")
+# ])

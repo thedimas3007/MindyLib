@@ -26,7 +26,7 @@ Python-based parser for Mindustry schematics and maps. WIP
     * `Tile[DuctBridge]`
 
 * **Minor issues**:
-  * [ ] Fix tint for tinted blocks
+  * [x] Fix tint for team-tinted blocks
   * [ ] Conveyors for rounded blocks 
 
 * **Rendering implementation progress**
