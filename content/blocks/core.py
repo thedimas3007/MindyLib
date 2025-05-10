@@ -1,28 +1,30 @@
-from g_types.block import Block, BlockOutput, BlockOutputDirection
+from g_types.block import Block, BlockOutput, BlockOutputDirection, LayeredBlock
+from g_types.layers import Layer, TeamLayer, ItemTintedLayer
 from .block_types import DefenseBlock, StorageBlock, DefenseTeamBlock, DefenseBasedBlock, RegenProjector, Unloader
 from .. import items
 
 category = "storage"
+defense_category = "defense"
 
-mender = DefenseBlock("Mender", 1, {
+mender = LayeredBlock("Mender", defense_category, 1, {
     items.lead: 30,
     items.copper: 25
 }, power_consumption=0.3)
 
-mend_projector = DefenseBlock("Mend Projector", 2, {
+mend_projector = LayeredBlock("Mend Projector", defense_category, 2, {
     items.lead: 100,
     items.titanium: 25,
     items.silicon: 40
 }, power_consumption=1.5)
 
-overdrive_projector = DefenseBlock("Overdrive Projector", 2, {
+overdrive_projector = LayeredBlock("Overdrive Projector", defense_category, 2, {
     items.lead: 100,
     items.titanium: 75,
     items.silicon: 75,
     items.plastanium: 30
 }, power_consumption=3.5)
 
-overdrive_dome = DefenseBlock("Overdrive Dome", 3, {
+overdrive_dome = LayeredBlock("Overdrive Dome", defense_category, 3, {
     items.lead: 200,
     items.titanium: 130,
     items.silicon: 130,
@@ -30,105 +32,120 @@ overdrive_dome = DefenseBlock("Overdrive Dome", 3, {
     items.surge_alloy: 120
 }, power_consumption=10.0)
 
-force_projector = DefenseTeamBlock("Force Projector", 3, {
+force_projector = LayeredBlock("Force Projector", defense_category, 3, {
     items.lead: 100,
     items.titanium: 75,
     items.silicon: 125
 }, power_consumption=4.0)
 
-shock_mine = DefenseBlock("Shock Mine", 1, {
+shock_mine = LayeredBlock("Shock Mine", defense_category, 1, {
     items.lead: 25,
     items.silicon: 12
 })
 
-radar = DefenseBasedBlock("Radar", 1, {
+radar = LayeredBlock("Radar", defense_category, 1, {
     items.silicon: 60,
     items.graphite: 50,
     items.beryllium: 10
-}, power_consumption=0.6)
+}, power_consumption=0.6, layers=[
+    Layer("@-base"),
+    Layer()
+])
 
-build_tower = DefenseBasedBlock("Build Tower", 3, {
+build_tower = LayeredBlock("Build Tower", defense_category, 3, {
     items.silicon: 150,
     items.oxide: 40,
     items.thorium: 60
-}, power_consumption=3)
+}, power_consumption=3, layers=[
+    Layer("@-base"),
+    Layer()
+])
 
-regen_projector = RegenProjector("Regen Projector", 3, {
+regen_projector = LayeredBlock("Regen Projector", defense_category, 3, {
     items.silicon: 80,
     items.tungsten: 60,
     items.oxide: 40,
     items.beryllium: 80
-}, power_consumption=1)
+}, power_consumption=1, layers=[
+    Layer("@-bottom"),
+    Layer()
+])
 
-illuminator = Block("Illuminator", "power", 1, {
+illuminator = LayeredBlock("Illuminator", "power", 1, {
     items.lead: 8,
     items.graphite: 12,
     items.silicon: 8
 }, power_consumption=0.05)
 
-core_shard = StorageBlock("Core Shard", 3, {
+core_shard = LayeredBlock("Core Shard", category, 3,{
     items.copper: 1000,
     items.lead: 800
-})
+}, layers=[
+    Layer(),
+    TeamLayer()
+])
 
-core_foundation = StorageBlock("Core Foundation", 4, {
+core_foundation = LayeredBlock("Core Foundation", category, 4, {
     items.copper: 3000,
     items.lead: 3000,
     items.silicon: 2000
-})
+}, layers=core_shard.layers)
 
-core_nucleus = StorageBlock("Core Nucleus", 5, {
+core_nucleus = LayeredBlock("Core Nucleus", category, 5, {
     items.copper: 8000,
     items.lead: 8000,
     items.silicon: 5000,
     items.thorium: 4000
-})
+}, layers=core_shard.layers)
 
-core_bastion = StorageBlock("Core Bastion", 4, {
+core_bastion = LayeredBlock("Core Bastion", category, 4, {
     items.graphite: 1000,
     items.silicon: 1000,
     items.beryllium: 800
-})
+}, layers=core_shard.layers)
 
-core_citadel = StorageBlock("Core Citadel", 5, {
+core_citadel = LayeredBlock("Core Citadel", category, 5, {
     items.silicon: 7000,
     items.beryllium: 7000,
     items.tungsten: 4000,
     items.oxide: 2500
-})
+}, layers=core_shard.layers)
 
-core_acropolis = StorageBlock("Core Acropolis", 6, {
+core_acropolis = LayeredBlock("Core Acropolis", category, 6, {
     items.beryllium: 12000,
     items.silicon: 11000,
     items.tungsten: 9000,
     items.carbide: 10000,
     items.oxide: 8000
-})
+}, layers=core_shard.layers)
 
-container = StorageBlock("Container", 2, {
+container = LayeredBlock("Container", category, 2, {
     items.titanium: 100
-})
+}, layers=core_shard.layers)
 
-vault = StorageBlock("Vault", 3, {
+vault = LayeredBlock("Vault", category, 3, {
     items.titanium: 250,
     items.thorium: 125
-})
+}, layers=core_shard.layers)
 
-unloader = Unloader("Unloader", 1, {
+unloader = LayeredBlock("Unloader", category, 1, {
     items.titanium: 25,
     items.silicon: 30
-})
+}, layers=[
+    Layer(),
+    ItemTintedLayer()
+])
 
-reinforced_container = StorageBlock("Reinforced Container", 2, {
+reinforced_container = LayeredBlock("Reinforced Container", category, 2, {
     items.tungsten: 30,
     items.graphite: 40
-})
+}, layers=core_shard.layers)
 
-reinforced_vault = StorageBlock("Reinforced Vault", 3, {
+reinforced_vault = LayeredBlock("Reinforced Vault", category, 3, {
     items.tungsten: 125,
     items.thorium: 70,
     items.beryllium: 100
-})
+}, layers=core_shard.layers)
 
 all_blocks = [
     mender, mend_projector, overdrive_projector, overdrive_dome,

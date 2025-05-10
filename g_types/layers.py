@@ -3,6 +3,8 @@ from typing import Optional, TypeAlias, Union
 from PIL import Image
 
 import g_types # Not importing schematic directly in order to avoid circular import
+from content.blocks.block_types import Conveyor
+from g_types import BlockOutputDirection
 from g_types.tile import Tile, TileRotation
 from utils import get_sprite, tint_image, add_outline, parse_color, pack_color
 
@@ -12,7 +14,7 @@ LayerLike: TypeAlias = Union[str | tuple[str, str], Image.Image, "Layer"]
 team_colors = [0xffd37f, 0xeab678, 0xd4816b]
 
 class Layer:
-    def __init__(self, layer: LayerLike) -> None:
+    def __init__(self, layer: LayerLike = "@") -> None:
         self.layer = layer
 
     def render(self, schematic: g_types.schematic.Schematic, tile: Tile) -> Image.Image:
@@ -62,12 +64,20 @@ class ItemConfigLayer(Layer):
             return get_sprite("distribution", "cross-full")
 
 class ItemTintedLayer(Layer):
+    def __init__(self, center: LayerLike = "@-center", arrow: Optional[LayerLike] = None) -> None:
+        super().__init__(center)
+        self.arrow = arrow
+
     def render(self, schematic: g_types.schematic.Schematic, tile: Tile) -> Image.Image:
         if tile.config:
             img = Layer.convert(self.layer, schematic, tile)
             return tint_image(img, tile.config.tuple_color)
         else:
-            return EmptyLayer().render(schematic, tile)
+            if self.arrow:
+                img = Layer.convert(self.arrow, schematic, tile).rotate(tile.rot.value * 90)
+                return img
+            else:
+                return EmptyLayer().render(schematic, tile)
 
 class OutlinedLayer(Layer):
     def __init__(self, layer: LayerLike, color: tuple[int, int, int] | int, thickness: int) -> None:
@@ -82,6 +92,9 @@ class OutlinedLayer(Layer):
         return add_outline(img, self.color, self.thickness)
 
 class TeamLayer(Layer):
+    def __init__(self, layer: LayerLike = "@-team") -> None:
+        super().__init__(layer)
+
     def render(self, schematic: g_types.schematic.Schematic, tile: Tile) -> Image.Image:
         img = Layer.convert(self.layer, schematic, tile)
         tinted = Image.new("RGBA", img.size, (0, 0, 0, 0))
@@ -100,21 +113,65 @@ class TeamLayer(Layer):
                 tinted.putpixel((x, y), tint_color)
         return tinted
 
-
-class LayeredBlock:
-    def __init__(self, layers: list[Layer]):
-        self.layers = layers
-
+class ConveyorLayer(Layer):
     def render(self, schematic: g_types.schematic.Schematic, tile: Tile) -> Image.Image:
-        if len(self.layers) == 0:
-            return EmptyLayer().render(schematic, tile)
-        base = self.layers[0].render(schematic, tile)
-        for layer in self.layers:
-            rendered = layer.render(schematic, tile)
-            base.paste(rendered, (0, 0), rendered)
-        return base
+        if isinstance(self.layer, str):
+            cat = tile.block.category
+            name = self.layer
+        elif isinstance(self.layer, tuple):
+            cat, name = self.layer
+        else:
+            raise TypeError(f"unknown layer type: {type(self.layer)}")
 
-# TODO: ConveyorLayer ??
+        BOD = BlockOutputDirection
+        block: Conveyor = tile.block
+        inputs = schematic.rotated_inputs(tile.pos, Conveyor if block.strict else None)
+        mask = (BOD.LEFT | BOD.BOTTOM | BOD.RIGHT)
+
+        n = 0
+        flip = None
+
+        if inputs & BOD.LEFT:
+            if inputs & BOD.RIGHT:
+                if inputs & BOD.BOTTOM:
+                    n = 3  # LEFT + RIGHT + BOTTOM
+                else:
+                    n = 4  # LEFT + RIGHT
+            elif inputs & BOD.BOTTOM:
+                n = 2
+                flip = Image.FLIP_TOP_BOTTOM  # LEFT + BOTTOM
+            else:
+                n = 1  # LEFT only
+
+        elif inputs & BOD.RIGHT:
+            if inputs & BOD.BOTTOM:
+                n = 2  # RIGHT + BOTTOM
+            else:
+                n = 1
+                flip = Image.FLIP_TOP_BOTTOM  # RIGHT only
+
+        elif (inputs & (BOD.LEFT | BOD.RIGHT)) == BOD.NONE:
+            n = 0
+
+        else:
+            print(f"ERROR: No 'n' for {tile.pos}")
+
+        name = name.replace("@", block.id).replace("#", str(n))
+        return get_sprite(cat, name)
+
+
+# class LayeredBlock:
+#     def __init__(self, layers: list[Layer]): # Should I use LayerLike maybe?
+#         self.layers = layers
+#
+#     def render(self, schematic: g_types.schematic.Schematic, tile: Tile) -> Image.Image:
+#         if len(self.layers) == 0:
+#             return EmptyLayer().render(schematic, tile)
+#         base = self.layers[0].render(schematic, tile)
+#         for layer in self.layers:
+#             rendered = layer.render(schematic, tile)
+#             base.paste(rendered, (0, 0), rendered)
+#         return base
 
 # mass_driver = LayeredBlock([
 #     Layer(("distribution", "@-base")),

@@ -1,17 +1,17 @@
-from g_types.block import Block, BlockOutput, BlockOutputDirection
+from g_types.block import Block, BlockOutput, BlockOutputDirection, LayeredBlock
 from .block_types import Pad
 from .. import items
 
 category = "campaign"
 
-launch_pad = Pad("Launch Pad",  3, {
+launch_pad = LayeredBlock("Launch Pad", category,  3, {
     items.copper: 350,
     items.silicon: 140,
     items.lead: 200,
     items.titanium: 150
 }, power_consumption=4.0)
 
-interplanetary_accelerator = Block("Interplanetary Accelerator",  category, 7, {
+interplanetary_accelerator = LayeredBlock("Interplanetary Accelerator",  category, 7, {
     items.copper: 16000,
     items.silicon: 11000,
     items.thorium: 13000,
