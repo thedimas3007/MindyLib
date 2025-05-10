@@ -3,9 +3,13 @@ from typing import Optional, TypeAlias, Union
 from PIL import Image
 
 import g_types # Not importing schematic directly in order to avoid circular import
-from content.blocks.block_types import Conveyor
-from g_types import BlockOutputDirection
+from g_types import Item
+
+# from content.blocks import block_types
+from g_types.block import BlockOutputDirection, BlockOutput
+from g_types.item_cost import ItemCost
 from g_types.tile import Tile, TileRotation
+from string_utils import space_to_kebab
 from utils import get_sprite, tint_image, add_outline, parse_color, pack_color
 
 LayerLike: TypeAlias = Union[str | tuple[str, str], Image.Image, "Layer"]
@@ -17,11 +21,11 @@ class Layer:
     def __init__(self, layer: LayerLike = "@") -> None:
         self.layer = layer
 
-    def render(self, schematic: g_types.schematic.Schematic, tile: Tile) -> Image.Image:
+    def render(self, schematic: "g_types.schematic.Schematic", tile: Tile) -> Image.Image:
         return Layer.convert(self.layer, schematic, tile)
 
     @staticmethod
-    def convert(layer: LayerLike, schematic: g_types.schematic.Schematic, tile: Tile) -> Image.Image:
+    def convert(layer: LayerLike, schematic: "g_types.schematic.Schematic", tile: Tile) -> Image.Image:
         if isinstance(layer, Image.Image):
             return layer
         elif isinstance(layer, Layer):
@@ -46,7 +50,7 @@ class RotatedLayer(Layer):
         self.dark = dark
         self.shift = shift
 
-    def render(self, schematic: g_types.schematic.Schematic, tile: Tile) -> Image.Image:
+    def render(self, schematic: "g_types.schematic.Schematic", tile: Tile) -> Image.Image:
         rotated = (tile.rot + self.shift)
         if rotated in [TileRotation.BOTTOM, TileRotation.LEFT] and self.dark is not None:
             return Layer.convert(self.dark, schematic, tile).rotate(rotated.value * 90)
@@ -57,7 +61,7 @@ class ItemConfigLayer(Layer):
     def __init__(self):
         super().__init__(EmptyLayer())
 
-    def render(self, schematic: g_types.schematic.Schematic, tile: Tile) -> Image.Image:
+    def render(self, schematic: "g_types.schematic.Schematic", tile: Tile) -> Image.Image:
         if tile.config:
             return Image.new("RGBA", (32,32), tile.config.tuple_color)
         else:
@@ -68,7 +72,7 @@ class ItemTintedLayer(Layer):
         super().__init__(center)
         self.arrow = arrow
 
-    def render(self, schematic: g_types.schematic.Schematic, tile: Tile) -> Image.Image:
+    def render(self, schematic: "g_types.schematic.Schematic", tile: Tile) -> Image.Image:
         if tile.config:
             img = Layer.convert(self.layer, schematic, tile)
             return tint_image(img, tile.config.tuple_color)
@@ -87,7 +91,7 @@ class OutlinedLayer(Layer):
         self.color = color
         self.thickness = thickness
 
-    def render(self, schematic: g_types.schematic.Schematic, tile: Tile) -> Image.Image:
+    def render(self, schematic: "g_types.schematic.Schematic", tile: Tile) -> Image.Image:
         img = Layer.convert(self.layer, schematic, tile)
         return add_outline(img, self.color, self.thickness)
 
@@ -95,7 +99,7 @@ class TeamLayer(Layer):
     def __init__(self, layer: LayerLike = "@-team") -> None:
         super().__init__(layer)
 
-    def render(self, schematic: g_types.schematic.Schematic, tile: Tile) -> Image.Image:
+    def render(self, schematic: "g_types.schematic.Schematic", tile: Tile) -> Image.Image:
         img = Layer.convert(self.layer, schematic, tile)
         tinted = Image.new("RGBA", img.size, (0, 0, 0, 0))
         pixels = img.load()
@@ -114,7 +118,7 @@ class TeamLayer(Layer):
         return tinted
 
 class ConveyorLayer(Layer):
-    def render(self, schematic: g_types.schematic.Schematic, tile: Tile) -> Image.Image:
+    def render(self, schematic: "g_types.schematic.Schematic", tile: Tile) -> Image.Image:
         if isinstance(self.layer, str):
             cat = tile.block.category
             name = self.layer
@@ -124,8 +128,9 @@ class ConveyorLayer(Layer):
             raise TypeError(f"unknown layer type: {type(self.layer)}")
 
         BOD = BlockOutputDirection
-        block: Conveyor = tile.block
-        inputs = schematic.rotated_inputs(tile.pos, Conveyor if block.strict else None)
+        # block: block_types.Conveyor = tile.block
+        # inputs = schematic.rotated_inputs(tile.pos, block_types.Conveyor if block.strict else None)
+        inputs = schematic.rotated_inputs(tile.pos, None)
         mask = (BOD.LEFT | BOD.BOTTOM | BOD.RIGHT)
 
         n = 0
@@ -156,47 +161,40 @@ class ConveyorLayer(Layer):
         else:
             print(f"ERROR: No 'n' for {tile.pos}")
 
-        name = name.replace("@", block.id).replace("#", str(n))
+        name = name.replace("@", tile.block.id).replace("#", str(n))
         return get_sprite(cat, name)
 
+# TODO: ConditionalLayer eventually, pointers?
 
-# class LayeredBlock:
-#     def __init__(self, layers: list[Layer]): # Should I use LayerLike maybe?
-#         self.layers = layers
-#
-#     def render(self, schematic: g_types.schematic.Schematic, tile: Tile) -> Image.Image:
-#         if len(self.layers) == 0:
-#             return EmptyLayer().render(schematic, tile)
-#         base = self.layers[0].render(schematic, tile)
-#         for layer in self.layers:
-#             rendered = layer.render(schematic, tile)
-#             base.paste(rendered, (0, 0), rendered)
-#         return base
+class LayeredBlock:
+    def __init__(self, name: str, category: str, size: int, cost: dict[Item, int] | ItemCost,
+                 output: BlockOutput = BlockOutput.NONE, output_direction: BlockOutputDirection = BlockOutputDirection.NONE,
+                 power_consumption: float = 0.0, layers: list[Layer] = None):
+        self.id = space_to_kebab(name)
+        self.name = name
+        self.category = category
+        self.size = size
+        self.cost = cost if isinstance(cost, ItemCost) else ItemCost(cost)
+        self.output = output
+        self.output_direction = output_direction
+        self.power_consumption = power_consumption
+        self.layers = layers or [Layer("@")]
 
-# mass_driver = LayeredBlock([
-#     Layer(("distribution", "@-base")),
-#     OutlinedLayer(("distribution", "@"), 0x3f3f3f, 3)
-# ])
-#
-# sorter = LayeredBlock([
-#     ItemConfigLayer(),
-#     Layer(("distribution", "@")),
-# ])
-#
-# uduct_unloader = LayeredBlock([
-#     Layer(("distribution/ducts", "@")),
-#     ItemTintedLayer(("distribution/ducts", f"@-center")),
-#     RotatedLayer(("distribution/ducts", f"@-top"))
-# ])
-#
-# uelectrolyzer = LayeredBlock([
-#     Layer("@-bottom"),
-#     Layer("@"),
-#     RotatedLayer("@-ozone-output1", "@-ozone-output2", 1),
-#     RotatedLayer("@-hydrogen-output1", "@-hydrogen-output2", 3)
-# ])
-#
-# ucore = LayeredBlock([
-#     Layer("@"),
-#     TeamLayer("@-te")
-# ])
+    @property
+    def energy_usage(self) -> float:
+        return self.power_consumption * 60
+
+    def sprite(self, schematic, tile) -> Image.Image: # TODO: rename to render
+        if len(self.layers) == 0:
+            return EmptyLayer().render(schematic, tile)
+        base = self.layers[0].render(schematic, tile)
+        for layer in self.layers:
+            rendered = layer.render(schematic, tile)
+            base.paste(rendered, (0, 0), rendered)
+        return base
+
+    def __str__(self):
+        return f"LayeredBlock(\"{self.name}\", \"{self.category}\", {self.size}, {self.cost}, {self.output}, {self.output_direction}, {self.power_consumption})"
+
+    def __repr__(self):
+        return self.__str__()

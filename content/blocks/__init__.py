@@ -1,6 +1,6 @@
 from typing import Optional
 
-from g_types import Block
+from g_types.block import Block
 from . import campaign, core, crafting, defense, distribution, experiment, liquid, logic, payload, power, production, sandbox, turret
 
 modules = [campaign, core, crafting, defense, distribution, experiment, liquid, logic, payload, power, production, sandbox, turret]

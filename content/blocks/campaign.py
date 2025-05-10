@@ -1,5 +1,4 @@
-from g_types.block import Block, BlockOutput, BlockOutputDirection, LayeredBlock
-from .block_types import Pad
+from g_types.layers import LayeredBlock
 from .. import items
 
 category = "campaign"

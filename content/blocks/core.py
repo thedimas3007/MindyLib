@@ -1,6 +1,5 @@
-from g_types.block import Block, BlockOutput, BlockOutputDirection, LayeredBlock
-from g_types.layers import Layer, TeamLayer, ItemTintedLayer
-from .block_types import DefenseBlock, StorageBlock, DefenseTeamBlock, DefenseBasedBlock, RegenProjector, Unloader
+from g_types import BlockOutput, BlockOutputDirection
+from g_types.layers import Layer, TeamLayer, ItemTintedLayer, LayeredBlock
 from .. import items
 
 category = "storage"
@@ -36,7 +35,10 @@ force_projector = LayeredBlock("Force Projector", defense_category, 3, {
     items.lead: 100,
     items.titanium: 75,
     items.silicon: 125
-}, power_consumption=4.0)
+}, power_consumption=4.0, layers=[
+    Layer(),
+    TeamLayer(),
+])
 
 shock_mine = LayeredBlock("Shock Mine", defense_category, 1, {
     items.lead: 25,
@@ -131,7 +133,7 @@ vault = LayeredBlock("Vault", category, 3, {
 unloader = LayeredBlock("Unloader", category, 1, {
     items.titanium: 25,
     items.silicon: 30
-}, layers=[
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, layers=[
     Layer(),
     ItemTintedLayer()
 ])
