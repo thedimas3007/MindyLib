@@ -1,100 +1,102 @@
 from g_types.block import Block, BlockOutput, BlockOutputDirection
+from g_types.layers import LayeredBlock, Layer, RotatedLayer, ConditionalLayer
 from .block_types import Wall
 from .. import items
 
-defense_category = "defense"
-wall_category = "walls"
+category = "walls"
 
-copper_wall = Wall("Copper Wall", 1, {
+copper_wall = LayeredBlock("Copper Wall", category, 1, {
     items.copper: 6
 })
 
-copper_wall_large = Wall("Copper Wall Large", 2, copper_wall.cost * 4)
+copper_wall_large = LayeredBlock("Copper Wall Large", category, 2, copper_wall.cost * 4)
 
-titanium_wall = Wall("Titanium Wall", 1, {
+titanium_wall = LayeredBlock("Titanium Wall", category, 1, {
     items.titanium: 6
 })
 
-titanium_wall_large = Wall("Titanium Wall Large", 2, titanium_wall.cost * 4)
+titanium_wall_large = LayeredBlock("Titanium Wall Large", category, 2, titanium_wall.cost * 4)
 
-plastanium_wall = Wall("Plastanium Wall", 1, {
+plastanium_wall = LayeredBlock("Plastanium Wall", category, 1, {
     items.plastanium: 5,
     items.metaglass: 2
 })
 
-plastanium_wall_large = Wall("Plastanium Wall Large", 2, plastanium_wall.cost * 4)
+plastanium_wall_large = LayeredBlock("Plastanium Wall Large", category, 2, plastanium_wall.cost * 4)
 
-thorium_wall = Wall("Thorium Wall", 1, {
+thorium_wall = LayeredBlock("Thorium Wall", category, 1, {
     items.thorium: 6
 })
 
-thorium_wall_large = Wall("Thorium Wall Large", 2, thorium_wall.cost * 4)
+thorium_wall_large = LayeredBlock("Thorium Wall Large", category, 2, thorium_wall.cost * 4)
 
-phase_wall = Wall("Phase Wall", 1, {
+phase_wall = LayeredBlock("Phase Wall", category, 1, {
     items.phase_fabric: 6
 })
 
-phase_wall_large = Wall("Phase Wall Large", 2, phase_wall.cost * 4)
+phase_wall_large = LayeredBlock("Phase Wall Large", category, 2, phase_wall.cost * 4)
 
-surge_wall = Wall("Surge Wall", 1, {
+surge_wall = LayeredBlock("Surge Wall", category, 1, {
     items.surge_alloy: 6
 })
 
-surge_wall_large = Wall("Surge Wall Large", 2, surge_wall.cost * 4)
+surge_wall_large = LayeredBlock("Surge Wall Large", category, 2, surge_wall.cost * 4)
 
-door = Wall("Door", 1, {
+door = LayeredBlock("Door", category, 1, {
     items.titanium: 6,
     items.silicon: 4
-})
+}, layers=[ConditionalLayer("@-open", "@")])
 
-door_large = Wall("Door Large", 2, door.cost * 4)
+door_large = LayeredBlock("Door Large", category, 2, door.cost * 4, layers=[
+    ConditionalLayer("@-open", "@")
+])
 
-scrap_wall = Wall("Scrap Wall", 1, {
+scrap_wall = LayeredBlock("Scrap Wall", category, 1, {
     items.scrap: 6
 })
 
-scrap_wall_large = Wall("Scrap Wall Large", 2, scrap_wall.cost * 4)
+scrap_wall_large = LayeredBlock("Scrap Wall Large", category, 2, scrap_wall.cost * 4)
 
-scrap_wall_huge = Wall("Scrap Wall Huge", 3, surge_wall.cost * 9)
+scrap_wall_huge = LayeredBlock("Scrap Wall Huge", category, 3, surge_wall.cost * 9)
 
-scrap_wall_gigantic = Wall("Scrap Wall Gigantic", 4, scrap_wall.cost * 16)
+scrap_wall_gigantic = LayeredBlock("Scrap Wall Gigantic", category, 4, scrap_wall.cost * 16)
 
-thruster = Wall("Thruster", 4, {
+thruster = LayeredBlock("Thruster", category, 4, {
     items.scrap: 96
-})
+}, layers=[Layer(), RotatedLayer("@-top")])
 
-beryllium_wall = Wall("Beryllium Wall", 1, {
+beryllium_wall = LayeredBlock("Beryllium Wall", category, 1, {
     items.beryllium: 6
 })
 
-beryllium_wall_large = Wall("Beryllium Wall Large", 4, beryllium_wall.cost * 4)
+beryllium_wall_large = LayeredBlock("Beryllium Wall Large", category, 4, beryllium_wall.cost * 4)
 
-tungsten_wall = Wall("Tungsten Wall", 1, {
+tungsten_wall = LayeredBlock("Tungsten Wall", category, 1, {
     items.tungsten: 6
 })
 
-tungsten_wall_large = Wall("Tungsten Wall Large", 2, tungsten_wall.cost * 4)
+tungsten_wall_large = LayeredBlock("Tungsten Wall Large", category, 2, tungsten_wall.cost * 4)
 
-blast_door = Wall("Blast Door", 2, {
+blast_door = LayeredBlock("Blast Door", category, 2, {
     items.tungsten: 24,
     items.silicon: 24
-})
+}, layers=[ConditionalLayer("@-open", "@")])
 
-reinforced_surge_wall = Wall("Reinforced Surge Wall", 1, {
+reinforced_surge_wall = LayeredBlock("Reinforced Surge Wall", category, 1, {
     items.surge_alloy: 6,
     items.tungsten: 2
 })
 
-reinforced_surge_wall_large = Wall("Reinforced Surge Wall Large", 2, reinforced_surge_wall.cost * 4)
+reinforced_surge_wall_large = LayeredBlock("Reinforced Surge Wall Large", category, 2, reinforced_surge_wall.cost * 4)
 
-carbide_wall = Wall("Carbide Wall", 1, {
+carbide_wall = LayeredBlock("Carbide Wall", category, 1, {
     items.thorium: 6,
     items.carbide: 6
 })
 
-carbide_wall_large = Wall("Carbide Wall Large", 2, carbide_wall.cost * 4)
+carbide_wall_large = LayeredBlock("Carbide Wall Large", category, 2, carbide_wall.cost * 4)
 
-shielded_wall = Wall("Shielded Wall", 2, {
+shielded_wall = LayeredBlock("Shielded Wall", category, 2, {
     items.phase_fabric: 20,
     items.surge_alloy: 12
 }, power_consumption=3/60)

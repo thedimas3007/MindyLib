@@ -164,7 +164,18 @@ class ConveyorLayer(Layer):
         name = name.replace("@", tile.block.id).replace("#", str(n))
         return get_sprite(cat, name)
 
-# TODO: ConditionalLayer eventually, pointers?
+class ConditionalLayer(Layer):
+    def __init__(self, true: LayerLike, false: Optional[LayerLike] = None, inverted: bool = False) -> None:
+        super().__init__(true)
+        self.false = false or EmptyLayer()
+        self.inverted = inverted
+
+    def render(self, schematic: "g_types.schematic.Schematic", tile: Tile) -> Image.Image:
+        if tile.config:
+            return Layer.render(self.layer if not self.inverted else self.false, schematic, tile)
+        else:
+            return Layer.render(self.false if not self.inverted else self.layer, schematic, tile)
+
 
 class LayeredBlock:
     def __init__(self, name: str, category: str, size: int, cost: dict[Item, int] | ItemCost,
