@@ -1,5 +1,5 @@
 from g_types.block import Block, BlockOutput, BlockOutputDirection
-from g_types.layers import LayeredBlock, Layer
+from g_types.layers import LayeredBlock, Layer, RotatedLayer
 from .block_types import GenericCrafter, PowerBlock
 from .. import items
 
@@ -138,96 +138,148 @@ incinerator = LayeredBlock("Incinerator", category, 1, {
 
 # TODO: continue from here
 
-silicon_arc_furnace = GenericCrafter("Silicon Arc Furnace", 3, {
+silicon_arc_furnace = LayeredBlock("Silicon Arc Furnace", category, 3, {
     items.beryllium: 70,
     items.graphite: 80
-}, power_consumption=6)
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=6, layers=[
+    Layer("@-bottom"),
+    Layer(),
+])
 
-electrolyzer = GenericCrafter("Electrolyzer", 3, {
+electrolyzer = LayeredBlock("Electrolyzer", category, 3, {
     items.silicon: 50,
     items.graphite: 40,
     items.beryllium: 130,
     items.tungsten: 80
-}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.LEFT | BlockOutputDirection.RIGHT, power_consumption=1)
+}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.LEFT | BlockOutputDirection.RIGHT, power_consumption=1, layers=[
+    Layer("@-bottom"),
+    Layer(),
+    RotatedLayer("@-hydrogen-output1", "@-hydrogen-output2", 1),
+    RotatedLayer("@-ozone-output1", "@-ozone-output2", 3)
+])
 
-atmospheric_concentrator = GenericCrafter("Atmospheric Concentrator", 3, {
+atmospheric_concentrator = LayeredBlock("Atmospheric Concentrator", category, 3, {
     items.oxide: 60,
     items.beryllium: 180,
     items.silicon: 150
-}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL, power_consumption=2)
+}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL, power_consumption=2, layers=[
+    Layer("@-bottom"),
+    Layer()
+])
 
-oxidation_chamber = GenericCrafter("Oxidation Chamber", 3, {
+oxidation_chamber = LayeredBlock("Oxidation Chamber", category, 3, {
     items.tungsten: 120,
     items.graphite: 100,
     items.silicon: 100,
     items.beryllium: 120
-}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=0.5)
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=0.5, layers=[
+    Layer("@-bottom"),
+    Layer(),
+    RotatedLayer("@-top1", "@-top2")
+])
 
-electric_heater = GenericCrafter("Electric Heater", 2, {
+electric_heater = LayeredBlock("Electric Heater", category, 2, {
     items.tungsten: 30,
     items.oxide: 30
-}, power_consumption=50/60)
+}, power_consumption=50/60, layers=[
+    Layer(),
+    RotatedLayer("@-top1", "@-top2")
+])
 
-slag_heater = GenericCrafter("Slag Heater", 3, {
+slag_heater = LayeredBlock("Slag Heater", category, 3, {
     items.tungsten: 50,
     items.oxide: 20,
     items.beryllium: 20
-}, )
+}, layers=[
+    Layer("@-bottom"),
+    Layer(),
+    RotatedLayer("@-top1", "@-top2")
+])
 
-phase_heater = GenericCrafter("Phase Heater", 2, {
+phase_heater = LayeredBlock("Phase Heater", category, 2, {
     items.oxide: 30,
     items.carbide: 30,
     items.beryllium: 30
-})
+}, layers=[
+    Layer(),
+    RotatedLayer("@-top1", "@-top2")
+])
 
-heat_redirector = GenericCrafter("Heat Redirector", 3, {
+heat_redirector = LayeredBlock("Heat Redirector", category, 3, {
     items.tungsten: 10,
     items.graphite: 10
-})
+}, layers=[
+    Layer(),
+    RotatedLayer("@-top1", "@-top2")
+])
 
-heat_router = GenericCrafter("Heat Router", 3, {
+heat_router = LayeredBlock("Heat Router", category, 3, {
     items.tungsten: 15,
     items.graphite: 10
-})
+}, layers=[
+    Layer(),
+    RotatedLayer("@-top1", "@-top2", 3),
+    RotatedLayer("@-top1", "@-top2", 0),
+    RotatedLayer("@-top1", "@-top2", 1)
+])
 
-slag_incinerator = GenericCrafter("Slag Incinerator", 1, {
+slag_incinerator = LayeredBlock("Slag Incinerator", category, 1, {
     items.tungsten: 15
-})
+}, layers=[
+    Layer(),
+    Layer("@-top")
+])
 
-carbide_crucible = GenericCrafter("Carbide Crucible", 3, {
+carbide_crucible = LayeredBlock("Carbide Crucible", category, 3, {
     items.tungsten: 110,
     items.thorium: 150,
     items.oxide: 60
-}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=2)
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=2, layers=[
+    Layer("@-bottom"),
+    Layer(),
+])
 
-slag_centrifuge = GenericCrafter("Slag Centrifuge", 3, {
+slag_centrifuge = LayeredBlock("Slag Centrifuge", category, 3, {
     items.carbide: 70,
     items.graphite: 60,
     items.silicon: 40,
     items.oxide: 40
-}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL, power_consumption=2/60)
+}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL, power_consumption=2/60, layers=[
+    Layer("@-bottom"),
+    Layer()
+])
 
-surge_crucible = GenericCrafter("Surge Crucible", 3, {
+surge_crucible = LayeredBlock("Surge Crucible", category, 3, {
     items.silicon: 100,
     items.graphite: 80,
     items.tungsten: 80,
     items.oxide: 80
-}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=2)
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=2, layers=[
+    Layer("@-bottom"),
+    Layer()
+])
 
-cyanogen_synthesizer = GenericCrafter("Cyanogen Synthesizer", 3, {
+cyanogen_synthesizer = LayeredBlock("Cyanogen Synthesizer", category, 3, {
     items.carbide: 50,
     items.silicon: 80,
     items.beryllium: 90
-}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL, power_consumption=2)
+}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL, power_consumption=2, layers=[
+    Layer("@-bottom"),
+    Layer()
+])
 
-phase_synthesizer = GenericCrafter("Phase Synthesizer", 3, {
+phase_synthesizer = LayeredBlock("Phase Synthesizer", category, 3, {
     items.carbide: 90,
     items.silicon: 100,
     items.thorium: 100,
     items.tungsten: 200
-}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=8)
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=8, layers=[
+    Layer("@-bottom"),
+    Layer(),
+    Layer("@-weave")
+])
 
-heat_reactor = GenericCrafter("Heat Reactor", 3, {
+heat_reactor = LayeredBlock("Heat Reactor", category, 3, {
     items.oxide: 70,
     items.graphite: 20,
     items.carbide: 10,
