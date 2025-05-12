@@ -32,9 +32,9 @@ Python-based parser for Mindustry schematics and maps. WIP
 * **Rendering implementation progress**
   * [x] Campaign
   * [x] Core
-  * [ ] Crafting
-  * [ ] Defense
-  * [x] Distribution
+  * [x] Crafting
+  * [x] Defense
+  * [ ] Distribution
   * [ ] Experiment
   * [ ] Liquid
   * [ ] Logic
