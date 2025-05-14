@@ -1,6 +1,4 @@
-from g_types.block import Block, BlockOutput, BlockOutputDirection
 from g_types.layers import LayeredBlock, Layer, RotatedLayer, ConditionalLayer
-from .block_types import Wall
 from .. import items
 
 category = "walls"

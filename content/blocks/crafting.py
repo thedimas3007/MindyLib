@@ -1,6 +1,5 @@
 from g_types.block import Block, BlockOutput, BlockOutputDirection
 from g_types.layers import LayeredBlock, Layer, RotatedLayer
-from .block_types import GenericCrafter, PowerBlock
 from .. import items
 
 category = "production"
