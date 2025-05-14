@@ -64,7 +64,8 @@ class StackConveyor(Block):
     def sprite(self, schematic, tile) -> Image.Image:
         BOD = BlockOutputDirection
         inputs = schematic.rotated_inputs(tile.pos, StackConveyor)
-        outputs = schematic.rotated_outputs(tile.pos, StackConveyor)
+        outputs = schematic.rotated_outputs(tile.pos, StackConveyor, True)
+
         input_mask = (BOD.LEFT | BOD.BOTTOM | BOD.RIGHT)
         output_mask = (BOD.LEFT | BOD.TOP | BOD.RIGHT)
         n = 0
@@ -206,7 +207,6 @@ class DuctUnloader(Block):
         top = top.rotate(tile.rot.value * 90)
         img.paste(top, (0,0), top)
         return img
-
 
 class CargoUnloadPoint(Block):
     def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):

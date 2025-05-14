@@ -84,10 +84,10 @@ class Schematic: # Read only for now
     def cost(self) -> ItemCost:
         return reduce(lambda a, b: a + b, (tile.block.cost for tile in self._tiles))
 
-    def _connection_dirs(self, pos: Point2 | tuple[int, int], output_type: BlockOutput, only_type: Optional[type], incoming: bool):
+    def _connection_dirs(self, pos: Point2 | tuple[int, int], output_type: BlockOutput, only_type: Optional[type], incoming: bool, ignore_directions: bool = False):
         pos = Point2.convert(pos)
-        if pos.x < 0 or pos.y < 0 or pos.x >= self.width or pos.y >= self.height:
-            raise ValueError("pos is out of bounds")
+        if not self.within_bounds(pos):
+            raise ValueError("pos is outside bounds")
         neighboring_directions = []
 
         for direction in Direction.all():
@@ -103,12 +103,12 @@ class Schematic: # Read only for now
 
             actual_dir = neighbor_tile.rotated_output()
             target_dir = direction.inverted() if incoming else direction
-            if target_dir in actual_dir and (only_type is None or isinstance(neighbor_tile.block, only_type)):
+            if (target_dir in actual_dir or ignore_directions) and (only_type is None or isinstance(neighbor_tile.block, only_type)):
                 neighboring_directions.append(direction)
 
         return neighboring_directions
 
-    def _rotated_dirs(self, pos: Point2 | tuple[int, int], only_type: Optional[type], incoming: bool):
+    def _rotated_dirs(self, pos: Point2 | tuple[int, int], only_type: Optional[type], incoming: bool, ignore_directions: bool = False):
         pos = Point2.convert(pos)
         if not self.within_bounds(pos):
             raise ValueError("pos is outside bounds")
@@ -118,7 +118,7 @@ class Schematic: # Read only for now
             return BlockOutputDirection.NONE
 
         neighbors = self.input_dirs(pos, tile.block.output, only_type) if incoming \
-            else self.output_dirs(pos, tile.block.output, only_type)
+            else self.output_dirs(pos, tile.block.output, only_type, ignore_directions)
         directions = BlockOutputDirection.NONE
 
         for direction in neighbors:
@@ -153,7 +153,7 @@ class Schematic: # Read only for now
         for conv in conveyors:
             outputs = self.rotated_outputs(conv.pos, StackConveyor)
             if not outputs & BlockOutputDirection.TOP: # No frontal outputs - last block of the chain
-                conv.block.output_direction = BlockOutputDirection.ALL
+                conv.output_override = BlockOutputDirection.ALL
 
     def _render_bridges(self, image: Image.Image, opacity=0.8):
         bridges: list[Tile] = [tile for tile in self._tiles if isinstance(tile.block, BridgeConveyor)]
@@ -315,14 +315,14 @@ class Schematic: # Read only for now
     def input_dirs(self, pos: Point2 | tuple[int, int], output_type: BlockOutput, only_type: Optional[type] = None) -> list[Direction]:
         return self._connection_dirs(pos, output_type, only_type, True)
 
-    def output_dirs(self, pos: Point2 | tuple[int, int], output_type: BlockOutput, only_type: Optional[type] = None) -> list[Direction]:
-        return self._connection_dirs(pos, output_type, only_type, False)
+    def output_dirs(self, pos: Point2 | tuple[int, int], output_type: BlockOutput, only_type: Optional[type] = None, ignore_directions: bool = False) -> list[Direction]:
+        return self._connection_dirs(pos, output_type, only_type, False, ignore_directions)
 
     def rotated_inputs(self, pos: Point2 | tuple[int, int], only_type: Optional[type] = None) -> BlockOutputDirection:
         return self._rotated_dirs(pos, only_type, True)
 
-    def rotated_outputs(self, pos: Point2 | tuple[int, int], only_type: Optional[type] = None) -> BlockOutputDirection:
-        return self._rotated_dirs(pos, only_type, False)
+    def rotated_outputs(self, pos: Point2 | tuple[int, int], only_type: Optional[type] = None, ignore_directions: bool = False) -> BlockOutputDirection:
+        return self._rotated_dirs(pos, only_type, False, ignore_directions)
 
     def __getitem__(self, item: Point2 | tuple[int, int]) -> Optional[Tile | GhostTile]:
         item = Point2.convert(item)

@@ -74,6 +74,7 @@ class Tile:
         self.block = block
         self.rot = rot
         self.config = config
+        self.output_override = None
 
     @property
     def x(self):
@@ -87,11 +88,12 @@ class Tile:
         return f"Tile({self.pos}, \"{self.block.name}\", {self.rot}, {repr(self.config)})"
 
     def rotated_output(self) -> tuple[Direction]:
-        if self.block.output == BlockOutput.NONE or self.block.output_direction == BlockOutputDirection.NONE:
+        block_directions = self.output_override or self.block.output_direction
+        if self.block.output == BlockOutput.NONE or block_directions == BlockOutputDirection.NONE:
             return tuple()
         output_directions = []
 
-        if BlockOutputDirection.FRONT & self.block.output_direction:
+        if BlockOutputDirection.FRONT & block_directions:
             if self.rot == TileRotation.RIGHT:
                 output_directions.append(Direction.RIGHT)
             elif self.rot == TileRotation.UP:
@@ -101,7 +103,7 @@ class Tile:
             elif self.rot == TileRotation.BOTTOM:
                 output_directions.append(Direction.BOTTOM)
 
-        if BlockOutputDirection.RIGHT & self.block.output_direction:
+        if BlockOutputDirection.RIGHT & block_directions:
             if self.rot == TileRotation.RIGHT:
                 output_directions.append(Direction.BOTTOM)
             elif self.rot == TileRotation.UP:
@@ -111,7 +113,7 @@ class Tile:
             elif self.rot == TileRotation.BOTTOM:
                 output_directions.append(Direction.LEFT)
 
-        if BlockOutputDirection.REAR & self.block.output_direction:
+        if BlockOutputDirection.REAR & block_directions:
             if self.rot == TileRotation.RIGHT:
                 output_directions.append(Direction.LEFT)
             elif self.rot == TileRotation.UP:
@@ -121,7 +123,7 @@ class Tile:
             elif self.rot == TileRotation.BOTTOM:
                 output_directions.append(Direction.TOP)
 
-        if BlockOutputDirection.LEFT & self.block.output_direction:
+        if BlockOutputDirection.LEFT & block_directions:
             if self.rot == TileRotation.RIGHT:
                 output_directions.append(Direction.TOP)
             elif self.rot == TileRotation.UP:
