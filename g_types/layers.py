@@ -68,7 +68,7 @@ class ItemConfigLayer(Layer):
             return get_sprite("distribution", "cross-full")
 
 class ItemTintedLayer(Layer):
-    def __init__(self, center: LayerLike = "@-center", arrow: Optional[LayerLike] = None) -> None:
+    def __init__(self, center: LayerLike, arrow: Optional[LayerLike] = None) -> None:
         super().__init__(center)
         self.arrow = arrow
 
@@ -118,6 +118,10 @@ class TeamLayer(Layer):
         return tinted
 
 class ConveyorLayer(Layer):
+    def __init__(self, layer: LayerLike = "@-#-0", strict: bool = False) -> None:
+        super().__init__(layer)
+        self.strict = strict
+
     def render(self, schematic: "g_types.schematic.Schematic", tile: Tile) -> Image.Image:
         if isinstance(self.layer, str):
             cat = tile.block.category
@@ -128,9 +132,7 @@ class ConveyorLayer(Layer):
             raise TypeError(f"unknown layer type: {type(self.layer)}")
 
         BOD = BlockOutputDirection
-        # block: block_types.Conveyor = tile.block
-        # inputs = schematic.rotated_inputs(tile.pos, block_types.Conveyor if block.strict else None)
-        inputs = schematic.rotated_inputs(tile.pos, None)
+        inputs = schematic.rotated_inputs(tile.pos, type(tile.block) if self.strict else None)
         mask = (BOD.LEFT | BOD.BOTTOM | BOD.RIGHT)
 
         n = 0
@@ -162,7 +164,10 @@ class ConveyorLayer(Layer):
             print(f"ERROR: No 'n' for {tile.pos}")
 
         name = name.replace("@", tile.block.id).replace("#", str(n))
-        return get_sprite(cat, name)
+        img = get_sprite(cat, name)
+        if flip:
+            img = img.transpose(flip)
+        return img.rotate(tile.rot.value * 90)
 
 class ConditionalLayer(Layer):
     def __init__(self, true: LayerLike, false: Optional[LayerLike] = None, inverted: bool = False) -> None:

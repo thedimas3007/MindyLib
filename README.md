@@ -37,7 +37,7 @@ Python-based parser for Mindustry schematics and maps. WIP
   * [ ] Distribution **FIX**
   * [x] Experiment
   * [ ] Liquid
-  * [ ] Logic
+  * [x] Logic
   * [ ] Payload
   * [ ] Power
   * [ ] Production

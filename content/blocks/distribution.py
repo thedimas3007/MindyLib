@@ -1,6 +1,7 @@
 from g_types.block import Block, BlockOutput, BlockOutputDirection
-from .block_types import TransportBlock, Conveyor, Sorter, StackConveyor, BridgeConveyor, MassDriver, Duct, FlowDuct, \
-    DuctRouter, CargoUnloadPoint, DuctUnloader, DuctBridge
+from g_types.layers import LayeredBlock, ConveyorLayer, ItemConfigLayer, Layer, OutlinedLayer, ConditionalLayer, \
+    ItemTintedLayer, RotatedLayer
+from .block_types import StackConveyor, BridgeConveyor, DuctBridge
 from .. import items
 
 distribution = "distribution"
@@ -9,15 +10,20 @@ conveyor_category = f"{distribution}/conveyors"
 stack_category = f"{distribution}/stack-conveyors"
 unit_category = "units"
 
-conveyor = Conveyor("Conveyor", 1, {
-    items.copper: 1
-}, output_direction=BlockOutputDirection.FRONT)
+# TODO: Transfer bridges and stack conveyors
 
-titanium_conveyor = Conveyor("Titanium Conveyor", 1, {
+class Conveyor(LayeredBlock):
+    pass
+
+conveyor = Conveyor("Conveyor", conveyor_category, 1, {
+    items.copper: 1
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.FRONT, layers=[ConveyorLayer()])
+
+titanium_conveyor = Conveyor("Titanium Conveyor", conveyor_category, 1, {
     items.copper: 1,
     items.lead: 1,
     items.titanium: 1
-}, output_direction=BlockOutputDirection.FRONT)
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.FRONT, layers=[ConveyorLayer()])
 
 plastanium_conveyor = StackConveyor("Plastanium Conveyor", 1, {
     items.plastanium: 1,
@@ -25,15 +31,15 @@ plastanium_conveyor = StackConveyor("Plastanium Conveyor", 1, {
     items.graphite: 1
 }, output_direction=BlockOutputDirection.FRONT)
 
-armored_conveyor = Conveyor("Armored Conveyor", 1, {
+armored_conveyor = Conveyor("Armored Conveyor", conveyor_category, 1, {
     items.plastanium: 1,
     items.thorium: 1,
     items.metaglass: 1
-}, output_direction=BlockOutputDirection.FRONT, strict=True)
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.FRONT, layers=[ConveyorLayer(strict=True)])
 
-junction = TransportBlock("Junction", 1, {
+junction = LayeredBlock("Junction", distribution, 1, {
     items.copper: 2
-})
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL)
 
 item_bridge = BridgeConveyor("Bridge Conveyor", 1, {
     items.lead: 6,
@@ -47,98 +53,126 @@ phase_conveyor = BridgeConveyor("Phase Conveyor", 1, {
     items.graphite: 10
 }, power_consumption=0.3)
 
-sorter = Sorter("Sorter", 1, {
+sorter = LayeredBlock("Sorter", distribution, 1, {
     items.lead: 2,
     items.copper: 2
-})
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, layers=[ItemConfigLayer(), Layer()])
 
-inverted_sorter = Sorter("Inverted Sorter", 1, {
+inverted_sorter = LayeredBlock("Inverted Sorter", distribution, 1, {
     items.lead: 2,
     items.copper: 2
-})
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, layers=[ItemConfigLayer(), Layer()])
 
-router = TransportBlock("Router", 1, {
+router = LayeredBlock("Router", distribution, 1, {
     items.copper: 3
-})
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL)
 
-distributor = TransportBlock("Distributor", 2, {
+distributor = LayeredBlock("Distributor", distribution, 2, {
     items.lead: 4,
     items.copper: 4
-})
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL)
 
-overflow_gate = TransportBlock("Overflow Gate", 1, {
+overflow_gate = LayeredBlock("Overflow Gate", distribution, 1, {
     items.lead: 2,
     items.copper: 4
-})
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL)
 
-underflow_gate = TransportBlock("Underflow Gate", 1, {
+underflow_gate = LayeredBlock("Underflow Gate", distribution, 1, {
     items.lead: 2,
     items.copper: 4
-})
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL)
 
-mass_driver = MassDriver("Mass Driver", 3, {
+mass_driver = LayeredBlock("Mass Driver", distribution, 3, {
     items.titanium: 125,
     items.silicon: 75,
     items.lead: 125,
     items.thorium: 50
-}, power_consumption=1.75)
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=1.75, layers=[
+    Layer("@-base"),
+    OutlinedLayer("@", 0x3f3f3f, 3)
+])
 
-duct = Duct("Duct", 1, {
+duct = Conveyor("Duct", duct_category, 1, {
     items.graphite: 5,
     items.metaglass: 2
-}, output_direction=BlockOutputDirection.FRONT)
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.FRONT, layers=[
+    ConveyorLayer("@-bottom-#"),
+    ConveyorLayer("@-top-#")
+])
 
-armored_duct = Duct("Armored Duct", 1, {
+armored_duct = Conveyor("Armored Duct", duct_category, 1, {
     items.beryllium: 2,
     items.tungsten: 1
-}, output_direction=BlockOutputDirection.FRONT, strict=True)
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.FRONT, layers=[
+    ConveyorLayer("duct-bottom-#", strict=True), # NB: not armored-duct-bottom
+    ConveyorLayer("@-top-#", strict=True)
+])
 
-duct_router = DuctRouter("Duct Router", 1, {
+duct_router = LayeredBlock("Duct Router", duct_category, 1, {
     items.graphite: 10,
     items.metaglass: 4
-})
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, layers=[
+    Layer(),
+    ItemTintedLayer("duct-unloader-center", "@-top")
+])
 
-overflow_duct = FlowDuct("Overflow Duct", 1, {
+overflow_duct = LayeredBlock("Overflow Duct", duct_category, 1, {
     items.graphite: 8,
     items.beryllium: 8
-})
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, layers=[
+    Layer(),
+    RotatedLayer("@-top")
+])
 
-underflow_duct = FlowDuct("Underflow Duct", 1, {
+underflow_duct = LayeredBlock("Underflow Duct", duct_category, 1, {
     items.graphite: 8,
     items.beryllium: 8
-})
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, layers=[
+    Layer(),
+    RotatedLayer("@-top")
+])
 
 duct_bridge = DuctBridge("Duct Bridge", 1, {
     items.graphite: 20,
     items.metaglass: 8
 }, output_direction=BlockOutputDirection.FRONT, max_range=4)
 
-duct_unloader = DuctUnloader("Duct Unloader", 1, {
+duct_unloader = LayeredBlock("Duct Unloader", duct_category, 1, {
     items.graphite: 20,
     items.silicon: 20,
     items.tungsten: 10
-})
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.FRONT, layers=[
+    Layer(),
+    ItemTintedLayer("@-center", "@-arrow"),
+    RotatedLayer("@-top")
+])
 
 surge_conveyor = StackConveyor("Surge Conveyor", 1, {
     items.surge_alloy: 1,
     items.tungsten: 1
 }, output_direction=BlockOutputDirection.FRONT, power_consumption=1/60)
 
-surge_router = DuctRouter("Surge Router", 1, {
+surge_router = LayeredBlock("Surge Router", duct_category, 1, {
     items.surge_alloy: 5,
     items.tungsten: 1
-}, power_consumption=3/60)
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=3/60, layers=[
+    Layer(),
+    ItemTintedLayer("duct-unloader-center", "@-top")
+])
 
-unit_cargo_loader = Block("Unit Cargo Loader", unit_category, 3, {
+unit_cargo_loader = LayeredBlock("Unit Cargo Loader", unit_category, 3, {
     items.silicon: 80,
     items.surge_alloy: 50,
     items.oxide: 20
 }, power_consumption=8/60)
 
-unit_cargo_unload_point = CargoUnloadPoint("Unit Cargo Unload Point", 2, {
+unit_cargo_unload_point = LayeredBlock("Unit Cargo Unload Point", unit_category, 2, {
     items.silicon: 60,
     items.tungsten: 60
-})
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, layers=[
+    Layer(),
+    ItemTintedLayer("@-top")
+])
 
 all_blocks = [
     conveyor, titanium_conveyor, plastanium_conveyor, armored_conveyor,

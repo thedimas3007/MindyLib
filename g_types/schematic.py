@@ -10,7 +10,7 @@ from typing import IO, BinaryIO, Optional
 from PIL import Image, ImageEnhance
 
 from content.blocks import get_block
-from content.blocks.block_types import PowerGenerator, Conveyor, StackConveyor, BridgeConveyor, DuctBridge
+from content.blocks.block_types import PowerGenerator, StackConveyor, BridgeConveyor, DuctBridge
 from .block import BlockOutput, BlockOutputDirection
 from .item_cost import ItemCost
 from .tile import Tile, GhostTile, Direction

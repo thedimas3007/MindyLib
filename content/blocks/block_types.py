@@ -6,57 +6,6 @@ from utils import add_outline, get_sprite, tint_image
 
 _sharded_color = (0xff, 0xd2, 0x7e)
 
-class DefenseBlock(Block):
-    def __init__(self, name, size, cost, output=BlockOutput.NONE, output_direction=BlockOutputDirection.NONE, power_consumption=0.0, category="defense"):
-        super().__init__(name, category, size, cost, output, output_direction, power_consumption)
-
-class TransportBlock(Block):
-    def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):
-        super().__init__(name, "distribution", size, cost, output, output_direction, power_consumption)
-
-class Conveyor(Block):
-    def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.FRONT, power_consumption=0.0, strict=False):
-        super().__init__(name, "distribution/conveyors", size, cost, output, output_direction, power_consumption)
-        self.strict = strict
-
-    def sprite(self, schematic, tile) -> Image.Image:
-        BOD = BlockOutputDirection
-        inputs = schematic.rotated_inputs(tile.pos, Conveyor if self.strict else None)
-        mask = (BOD.LEFT | BOD.BOTTOM | BOD.RIGHT)
-
-        n = 0
-        flip = None
-
-        if inputs & BOD.LEFT:
-            if inputs & BOD.RIGHT:
-                if inputs & BOD.BOTTOM:
-                    n = 3  # LEFT + RIGHT + BOTTOM
-                else:
-                    n = 4  # LEFT + RIGHT
-            elif inputs & BOD.BOTTOM:
-                n = 2
-                flip = Image.FLIP_TOP_BOTTOM  # LEFT + BOTTOM
-            else:
-                n = 1  # LEFT only
-
-        elif inputs & BOD.RIGHT:
-            if inputs & BOD.BOTTOM:
-                n = 2  # RIGHT + BOTTOM
-            else:
-                n = 1
-                flip = Image.FLIP_TOP_BOTTOM  # RIGHT only
-
-        elif (inputs & (BOD.LEFT | BOD.RIGHT)) == BOD.NONE:
-            n = 0
-
-        else:
-            print(f"ERROR: No 'n' for {tile.pos}")
-        # print(f"{tile.pos}:\ti={inputs}\tn={n}")
-        img = get_sprite(self.category, f"{self.id}-{n}-0")  # second zero is just animation frame; GIFs anyone? :P
-        if flip:
-            img = img.transpose(flip)
-        return img.rotate(tile.rot.value * 90)
-
 class StackConveyor(Block):
     def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.FRONT, power_consumption=0.0):
         super().__init__(name, "distribution/stack-conveyors", size, cost, output, output_direction, power_consumption)
@@ -103,122 +52,9 @@ class StackConveyor(Block):
         # print(f"{tile.pos}\ti={inputs}\to={outputs}\tn={n}")
         return img.rotate(tile.rot.value * 90)
 
-class BridgeConveyor(TransportBlock):
-    pass # Just to indicate that current block should be rendered as a bridge
-
-class Sorter(TransportBlock):
+class BridgeConveyor(Block):
     def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):
-        super().__init__(name, size, cost, output, output_direction, power_consumption)
-
-    def sprite(self, schematic, tile) -> Image.Image:
-        config = get_sprite(self.category, "cross-full") if not tile.config else \
-            Image.new("RGBA", (32,32), tile.config.tuple_color)
-        sprite = get_sprite(self.category, self.id)
-        config.paste(sprite, (0, 0), sprite)
-        return config
-
-class MassDriver(TransportBlock):
-    def sprite(self, schematic, tile) -> Image.Image:
-        base = get_sprite(self.category, f"{self.id}-base")
-        top = get_sprite(self.category, self.id)
-        top_outlined = add_outline(top, (63, 63, 63), 3)
-        base.paste(top_outlined, (0, 0), top_outlined)
-        return base
-
-class Duct(Block):
-    def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.FRONT, power_consumption=0.0, strict=False):
-        super().__init__(name, "distribution/ducts", size, cost, output, output_direction, power_consumption)
-        self.strict = strict
-
-    def sprite(self, schematic, tile) -> Image.Image:
-        BOD = BlockOutputDirection
-        inputs = schematic.rotated_inputs(tile.pos, Conveyor if self.strict else None)
-        mask = (BOD.LEFT | BOD.BOTTOM | BOD.RIGHT)
-
-        n = 0
-        flip = None
-
-        if inputs & BOD.LEFT:
-            if inputs & BOD.RIGHT:
-                if inputs & BOD.BOTTOM:
-                    n = 3  # LEFT + RIGHT + BOTTOM
-                else:
-                    n = 4  # LEFT + RIGHT
-            elif inputs & BOD.BOTTOM:
-                n = 2
-                flip = Image.FLIP_TOP_BOTTOM  # LEFT + BOTTOM
-            else:
-                n = 1  # LEFT only
-
-        elif inputs & BOD.RIGHT:
-            if inputs & BOD.BOTTOM:
-                n = 2  # RIGHT + BOTTOM
-            else:
-                n = 1
-                flip = Image.FLIP_TOP_BOTTOM  # RIGHT only
-
-        elif (inputs & (BOD.LEFT | BOD.RIGHT)) == BOD.NONE:
-            n = 0
-
-        else:
-            print(f"ERROR: No 'n' for {tile.pos}")
-        # print(f"{tile.pos}:\ti={inputs}\tn={n}")
-        img = get_sprite(self.category, f"{self.id}-bottom-{n}")
-        top = get_sprite(self.category, f"{self.id}-top-{n}")
-        img.paste(top, (0,0), top)
-        if flip:
-            img = img.transpose(flip)
-        return img.rotate(tile.rot.value * 90)
-
-class DuctRouter(Block):
-    def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):
-        super().__init__(name, "distribution/ducts", size, cost, output, output_direction, power_consumption)
-
-    def sprite(self, schematic, tile) -> Image.Image:
-        img = get_sprite(self.category, self.id)
-        top = tint_image(get_sprite("distribution", "center"), tile.config.color) if tile.config else \
-            get_sprite(self.category, f"{self.id}-top")
-        top = top.rotate(tile.rot.value * 90)
-        img.paste(top, (0,0), top)
-        return img
-
-class FlowDuct(Block): # Overflow/Underflow ducts
-    def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):
-        super().__init__(name, "distribution/ducts", size, cost, output, output_direction, power_consumption)
-
-    def sprite(self, schematic, tile) -> Image.Image:
-        img = get_sprite(self.category, self.id)
-        top = get_sprite(self.category, f"{self.id}-top")
-        top = top.rotate(tile.rot.value * 90)
-        img.paste(top, (0,0), top)
-        return img
-
-class DuctUnloader(Block):
-    def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.FRONT, power_consumption=0.0):
-        super().__init__(name, "distribution/ducts", size, cost, output, output_direction, power_consumption)
-
-    def sprite(self, schematic, tile) -> Image.Image:
-        img = get_sprite(self.category, self.id)
-        config = tint_image(get_sprite(self.category, f"{self.id}-center"), tile.config.color) if tile.config else \
-            get_sprite(self.category, f"{self.id}-arrow")
-        top = get_sprite(self.category, f"{self.id}-top")
-        config = config.rotate(tile.rot.value * 90)
-        img.paste(config, (0,0), config)
-        top = top.rotate(tile.rot.value * 90)
-        img.paste(top, (0,0), top)
-        return img
-
-class CargoUnloadPoint(Block):
-    def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):
-        super().__init__(name, "units", size, cost, output, output_direction, power_consumption)
-
-    def sprite(self, schematic, tile) -> Image.Image:
-        img = get_sprite(self.category, self.id)
-        top = tint_image(get_sprite(self.category, f"{self.id}-top"), tile.config.color) if tile.config else None
-        if top:
-            top.rotate(tile.rot.value * 90)
-            img.paste(top, (0,0), top)
-        return img
+        super().__init__(name, "distribution", size, cost, output, output_direction, power_consumption)
 
 class DuctBridge(Block):
     def __init__(self, name, size, cost, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.FRONT, power_consumption=0.0, max_range=0):
@@ -235,10 +71,6 @@ class DuctBridge(Block):
 class Pump(Block):
     def __init__(self, name, size, cost, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):
         super().__init__(name, "liquid", size, cost, output, output_direction, power_consumption)
-
-class LogicBlock(Block):
-    def __init__(self, name, size, cost, output=BlockOutput.NONE, output_direction=BlockOutputDirection.NONE, power_consumption=0.0):
-        super().__init__(name, "logic", size, cost, output, output_direction, power_consumption)
 
 class PayloadBlock(Block):
     def __init__(self, name, size, cost, output=BlockOutput.NONE, output_direction=BlockOutputDirection.NONE, power_consumption=0.0):
