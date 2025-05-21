@@ -11,23 +11,21 @@ Python-based parser for Mindustry schematics and maps. WIP
   * [x] Implement game types
   * [x] Copy game blocks
     * [ ] Verify blocks afterward
-    * [ ] Classes for common blocks in `blocks`
-      * Conveyors, routers, pipes, etc.
-      * Will implement same rendering logic
-  * [ ] Clean-up Enums, join mby
-  * [ ] Get rid of loads of ifs; implement rotation logic
-  * [ ] ~~Colorful output of tests~~
+    * [x] Classes for common blocks in `blocks`
   * [ ] Comprehensive documentation
   * [ ] Mod support as some sort of "plugin"
-  * [ ] Make layer rendering system
-    * RotatedLayer, TintedLayer, etc
-    * So that I won't have to reimplement many block
+  * [x] Make layer rendering system
   * [ ] Add Generic block type for `Tile` for better typing
     * `Tile[DuctBridge]`
+  * [ ] Default values for specific block types
+    * Conveyors, conduits, etc.
 
-* **Minor issues**:
+* **Minor issues / improvements**:
   * [x] Fix tint for team-tinted blocks
-  * [ ] Conveyors for rounded blocks 
+  * [ ] Fix phase bridges having center transparent
+  * [ ] Implement seamless conveyors for payload
+  * [ ] Conveyors for rounded blocks
+  * [ ] Arrows and ends on bridges
 
 * **Rendering implementation progress**
   * [x] Campaign
@@ -45,7 +43,7 @@ Python-based parser for Mindustry schematics and maps. WIP
   * [ ] Turret
 
 * **Schematics**
-  * [ ] Improved preview generation
+  * [x] Improved preview generation
     * I mean, dynamic conveyors, colored sorters, etc
     * Maybe show those canvases rendered
   * [x] More information about schematics
