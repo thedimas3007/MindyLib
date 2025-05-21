@@ -169,6 +169,63 @@ class ConveyorLayer(Layer):
             img = img.transpose(flip)
         return img.rotate(tile.rot.value * 90)
 
+class StackConveyorLayer(Layer):
+    def __init__(self, layer: LayerLike = "@-#", edge: LayerLike = "@-edge") -> None:
+        super().__init__(layer)
+        self.edge = edge
+
+    def render(self, schematic: "g_types.schematic.Schematic", tile: Tile) -> Image.Image:
+        if isinstance(self.layer, str):
+            cat = tile.block.category
+            name = self.layer
+        elif isinstance(self.layer, tuple):
+            cat, name = self.layer
+        else:
+            raise TypeError(f"unknown layer type: {type(self.layer)}")
+
+        BOD = BlockOutputDirection
+        inputs = schematic.rotated_inputs(tile.pos, type(tile.block))
+        outputs = schematic.rotated_outputs(tile.pos, type(tile.block), True)
+
+        input_mask = (BOD.LEFT | BOD.BOTTOM | BOD.RIGHT)
+        output_mask = (BOD.LEFT | BOD.TOP | BOD.RIGHT)
+        n = 0
+
+        first = False
+        if not outputs & BOD.TOP: # No frontal outputs - last block of the chain
+            n = 2
+        elif inputs & input_mask: # Any input - middle block
+            n = 0
+        elif inputs & input_mask == BOD.NONE: # No input - start block
+            n = 1
+            first = True
+        else: # No match - fallback
+            print(f"ERROR: No 'n' for {tile.pos}")
+            n = 1
+
+        angles = {
+            BOD.TOP: 0,
+            BOD.LEFT: 90,
+            BOD.BOTTOM: 180,
+            BOD.RIGHT: 270
+        }
+
+        img = get_sprite(cat, name.replace("@", tile.block.id).replace("#", str(n)))
+        edge = Layer.convert(self.edge, schematic, tile)
+
+        all_inputs = schematic.rotated_inputs(tile.pos)
+        for s in (BOD.TOP, BOD.RIGHT, BOD.BOTTOM, BOD.LEFT):
+            if s == BOD.TOP and outputs & BOD.TOP:
+                pass # Skip top if the conveyor isn't the last one
+            elif not ((s & inputs) or (first and (s & all_inputs))):
+                rotated = edge.rotate(angles[s])
+                img.paste(rotated, (0,0), rotated)
+
+        # print(f"{tile.pos}\ti={inputs}\to={outputs}\tn={n}")
+        return img.rotate(tile.rot.value * 90)
+
+
+
 class ConditionalLayer(Layer):
     def __init__(self, true: LayerLike, false: Optional[LayerLike] = None, inverted: bool = False) -> None:
         super().__init__(true)

@@ -1,7 +1,6 @@
 from g_types.block import BlockOutput, BlockOutputDirection
 from g_types.layers import LayeredBlock, ConveyorLayer, ItemConfigLayer, Layer, OutlinedLayer, \
-    ItemTintedLayer, RotatedLayer
-from .block_types import StackConveyor
+    ItemTintedLayer, RotatedLayer, StackConveyorLayer
 from .. import items
 
 distribution = "distribution"
@@ -25,6 +24,9 @@ class DuctBridge(LayeredBlock):
         self.max_range = max_range
     pass
 
+class StackConveyor(LayeredBlock):
+    pass
+
 conveyor = Conveyor("Conveyor", conveyor_category, 1, {
     items.copper: 1
 }, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.FRONT, layers=[ConveyorLayer()])
@@ -35,11 +37,11 @@ titanium_conveyor = Conveyor("Titanium Conveyor", conveyor_category, 1, {
     items.titanium: 1
 }, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.FRONT, layers=[ConveyorLayer()])
 
-plastanium_conveyor = StackConveyor("Plastanium Conveyor", 1, {
+plastanium_conveyor = StackConveyor("Plastanium Conveyor", stack_category, 1, {
     items.plastanium: 1,
     items.silicon: 1,
     items.graphite: 1
-}, output_direction=BlockOutputDirection.FRONT)
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.FRONT, layers=[StackConveyorLayer()])
 
 armored_conveyor = Conveyor("Armored Conveyor", conveyor_category, 1, {
     items.plastanium: 1,
@@ -157,10 +159,10 @@ duct_unloader = LayeredBlock("Duct Unloader", duct_category, 1, {
     RotatedLayer("@-top")
 ])
 
-surge_conveyor = StackConveyor("Surge Conveyor", 1, {
+surge_conveyor = StackConveyor("Surge Conveyor", stack_category, 1, {
     items.surge_alloy: 1,
     items.tungsten: 1
-}, output_direction=BlockOutputDirection.FRONT, power_consumption=1/60)
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.FRONT, layers=[StackConveyorLayer()])
 
 surge_router = LayeredBlock("Surge Router", duct_category, 1, {
     items.surge_alloy: 5,
