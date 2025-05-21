@@ -1,4 +1,4 @@
-from g_types.block import Block, BlockOutput, BlockOutputDirection
+from g_types.block import BlockOutput, BlockOutputDirection
 from .block_types import PowerBlock, PowerGenerator
 from .. import items
 

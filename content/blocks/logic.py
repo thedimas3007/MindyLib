@@ -1,4 +1,3 @@
-from g_types.block import Block, BlockOutput, BlockOutputDirection
 from g_types.layers import LayeredBlock, ConditionalLayer, Layer
 from .. import items
 

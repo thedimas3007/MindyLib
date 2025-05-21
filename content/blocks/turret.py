@@ -1,4 +1,3 @@
-from g_types.block import Block, BlockOutput, BlockOutputDirection
 from .block_types import Turret
 from .. import items
 

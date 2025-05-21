@@ -1,6 +1,5 @@
 from g_types.block import Block, BlockOutput, BlockOutputDirection
 from .block_types import Factory, PayloadBlock
-from .sandbox import payload_void
 from .. import items
 
 unit_category = "unit"
