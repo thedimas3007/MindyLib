@@ -135,7 +135,7 @@ unloader = LayeredBlock("Unloader", category, 1, {
     items.silicon: 30
 }, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, layers=[
     Layer(),
-    ItemTintedLayer()
+    ItemTintedLayer("@-center")
 ])
 
 reinforced_container = LayeredBlock("Reinforced Container", category, 2, {

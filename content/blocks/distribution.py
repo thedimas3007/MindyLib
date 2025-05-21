@@ -1,7 +1,7 @@
-from g_types.block import Block, BlockOutput, BlockOutputDirection
-from g_types.layers import LayeredBlock, ConveyorLayer, ItemConfigLayer, Layer, OutlinedLayer, ConditionalLayer, \
+from g_types.block import BlockOutput, BlockOutputDirection
+from g_types.layers import LayeredBlock, ConveyorLayer, ItemConfigLayer, Layer, OutlinedLayer, \
     ItemTintedLayer, RotatedLayer
-from .block_types import StackConveyor, BridgeConveyor, DuctBridge
+from .block_types import StackConveyor
 from .. import items
 
 distribution = "distribution"
@@ -10,9 +10,19 @@ conveyor_category = f"{distribution}/conveyors"
 stack_category = f"{distribution}/stack-conveyors"
 unit_category = "units"
 
-# TODO: Transfer bridges and stack conveyors
-
+# FIXME: Classes shall not be here, but rather moved to block_types.py eventually
 class Conveyor(LayeredBlock):
+    pass
+
+class BridgeConveyor(LayeredBlock):
+    pass
+
+class DuctBridge(LayeredBlock):
+    def __init__(self, name, category, size, cost,
+                 output = BlockOutput.NONE, output_direction = BlockOutputDirection.FRONT,
+                 power_consumption = 0.0, layers: list[Layer] = None, max_range = 0):
+        super().__init__(name, category, size, cost, output, output_direction, power_consumption, layers)
+        self.max_range = max_range
     pass
 
 conveyor = Conveyor("Conveyor", conveyor_category, 1, {
@@ -41,17 +51,17 @@ junction = LayeredBlock("Junction", distribution, 1, {
     items.copper: 2
 }, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL)
 
-item_bridge = BridgeConveyor("Bridge Conveyor", 1, {
+item_bridge = BridgeConveyor("Bridge Conveyor", distribution, 1, {
     items.lead: 6,
     items.copper: 6
-})
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL)
 
-phase_conveyor = BridgeConveyor("Phase Conveyor", 1, {
+phase_conveyor = BridgeConveyor("Phase Conveyor", distribution, 1, {
     items.phase_fabric: 5,
     items.silicon: 7,
     items.lead: 10,
     items.graphite: 10
-}, power_consumption=0.3)
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=0.3)
 
 sorter = LayeredBlock("Sorter", distribution, 1, {
     items.lead: 2,
@@ -132,10 +142,10 @@ underflow_duct = LayeredBlock("Underflow Duct", duct_category, 1, {
     RotatedLayer("@-top")
 ])
 
-duct_bridge = DuctBridge("Duct Bridge", 1, {
+duct_bridge = DuctBridge("Duct Bridge", duct_category, 1, {
     items.graphite: 20,
     items.metaglass: 8
-}, output_direction=BlockOutputDirection.FRONT, max_range=4)
+}, max_range=4, layers=[Layer(), RotatedLayer("@-dir")])
 
 duct_unloader = LayeredBlock("Duct Unloader", duct_category, 1, {
     items.graphite: 20,
