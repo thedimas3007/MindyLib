@@ -1,7 +1,27 @@
 from g_types.block import Block, BlockOutput, BlockOutputDirection
+from g_types.layers import LayeredBlock, Layer
 
 _sharded_color = (0xff, 0xd2, 0x7e)
 
+class Conveyor(LayeredBlock):
+    pass
+
+class BridgeConveyor(LayeredBlock):
+    pass
+
+class DuctBridge(LayeredBlock):
+    def __init__(self, name, category, size, cost,
+                 output = BlockOutput.NONE, output_direction = BlockOutputDirection.FRONT,
+                 power_consumption = 0.0, layers: list[Layer] = None, max_range = 0):
+        super().__init__(name, category, size, cost, output, output_direction, power_consumption, layers)
+        self.max_range = max_range
+    pass
+
+class StackConveyor(LayeredBlock):
+    pass
+
+# region Old types
+#### SHOULD BE REMOVED ####
 class Pump(Block):
     def __init__(self, name, size, cost, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL, power_consumption=0.0):
         super().__init__(name, "liquid", size, cost, output, output_direction, power_consumption)
@@ -31,3 +51,4 @@ class Turret(Block):
     def __init__(self, name, size, cost, output=BlockOutput.NONE, output_direction=BlockOutputDirection.NONE, power_consumption=0.0, reinforced=False):
         super().__init__(name, "turrets", size, cost, output, output_direction, power_consumption)
         self.reinforced = reinforced
+# endregion

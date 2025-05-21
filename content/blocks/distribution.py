@@ -1,6 +1,7 @@
 from g_types.block import BlockOutput, BlockOutputDirection
 from g_types.layers import LayeredBlock, ConveyorLayer, ItemConfigLayer, Layer, OutlinedLayer, \
     ItemTintedLayer, RotatedLayer, StackConveyorLayer
+from ..blocks.block_types import Conveyor, StackConveyor, BridgeConveyor, DuctBridge
 from .. import items
 
 distribution = "distribution"
@@ -10,22 +11,6 @@ stack_category = f"{distribution}/stack-conveyors"
 unit_category = "units"
 
 # FIXME: Classes shall not be here, but rather moved to block_types.py eventually
-class Conveyor(LayeredBlock):
-    pass
-
-class BridgeConveyor(LayeredBlock):
-    pass
-
-class DuctBridge(LayeredBlock):
-    def __init__(self, name, category, size, cost,
-                 output = BlockOutput.NONE, output_direction = BlockOutputDirection.FRONT,
-                 power_consumption = 0.0, layers: list[Layer] = None, max_range = 0):
-        super().__init__(name, category, size, cost, output, output_direction, power_consumption, layers)
-        self.max_range = max_range
-    pass
-
-class StackConveyor(LayeredBlock):
-    pass
 
 conveyor = Conveyor("Conveyor", conveyor_category, 1, {
     items.copper: 1
