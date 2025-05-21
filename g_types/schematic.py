@@ -10,7 +10,7 @@ from typing import IO, BinaryIO, Optional
 from PIL import Image, ImageEnhance
 
 from content.blocks import get_block
-from content.blocks.block_types import PowerGenerator, StackConveyor, BridgeConveyor, DuctBridge
+from content.blocks.block_types import PowerGenerator, StackConveyor, Bridge, DirectionalBridge
 from .block import BlockOutput, BlockOutputDirection
 from .item_cost import ItemCost
 from .tile import Tile, GhostTile, Direction
@@ -156,7 +156,7 @@ class Schematic: # Read only for now
                 conv.output_override = BlockOutputDirection.ALL
 
     def _render_bridges(self, image: Image.Image, opacity=0.8):
-        bridges: list[Tile] = [tile for tile in self._tiles if isinstance(tile.block, BridgeConveyor)]
+        bridges: list[Tile] = [tile for tile in self._tiles if isinstance(tile.block, Bridge)]
 
         for bridge in bridges:
             pos = Point2.convert(bridge.config)
@@ -186,9 +186,9 @@ class Schematic: # Read only for now
 
                 pos = Point2(pos.x + step_x, pos.y + step_y)
 
-    def _render_duct_bridges(self, image: Image.Image, opacity=0.8):
+    def _render_dir_bridges(self, image: Image.Image, opacity=0.8):
         def next_bridge(current: Tile) -> tuple[int, Optional[Tile]]:
-            block: DuctBridge = current.block
+            block: DirectionalBridge = current.block
             direction = Direction.from_rotation(current.rot)
             x, y = current.pos.x, current.pos.y
             dx, dy = direction.offset
@@ -201,15 +201,17 @@ class Schematic: # Read only for now
                 tile = self[x,y]
                 if not tile:
                     continue
-                if isinstance(tile.block, DuctBridge):
+                if tile.block.output != current.block.output:
+                    continue
+                if isinstance(tile.block, DirectionalBridge):
                     return dist, tile
             return 0, None
 
 
-        bridges: list[Tile] = [tile for tile in self._tiles if isinstance(tile.block, DuctBridge)]
+        bridges: list[Tile] = [tile for tile in self._tiles if isinstance(tile.block, DirectionalBridge)]
 
         for bridge in bridges:
-            bridge_img = get_sprite("distribution/ducts", f"{bridge.block.id}-bridge") \
+            bridge_img = get_sprite(bridge.block.category, f"{bridge.block.id}-bridge") \
                 .rotate(bridge.rot.value * 90)
             dist, next_one = next_bridge(bridge)
             if dist == 0 or not next_one:
@@ -250,7 +252,7 @@ class Schematic: # Read only for now
 
             preview.paste(block_img, (x_pos, flipped_y))
         self._render_bridges(preview)
-        self._render_duct_bridges(preview)
+        self._render_dir_bridges(preview)
         preview.save(filename)
 
     def render_canvases(self) -> None:

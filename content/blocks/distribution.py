@@ -1,7 +1,7 @@
 from g_types.block import BlockOutput, BlockOutputDirection
 from g_types.layers import LayeredBlock, ConveyorLayer, ItemConfigLayer, Layer, OutlinedLayer, \
     ItemTintedLayer, RotatedLayer, StackConveyorLayer
-from ..blocks.block_types import Conveyor, StackConveyor, BridgeConveyor, DuctBridge
+from ..blocks.block_types import Conveyor, StackConveyor, Bridge, DirectionalBridge
 from .. import items
 
 distribution = "distribution"
@@ -38,12 +38,12 @@ junction = LayeredBlock("Junction", distribution, 1, {
     items.copper: 2
 }, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL)
 
-item_bridge = BridgeConveyor("Bridge Conveyor", distribution, 1, {
+item_bridge = Bridge("Bridge Conveyor", distribution, 1, {
     items.lead: 6,
     items.copper: 6
 }, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL)
 
-phase_conveyor = BridgeConveyor("Phase Conveyor", distribution, 1, {
+phase_conveyor = Bridge("Phase Conveyor", distribution, 1, {
     items.phase_fabric: 5,
     items.silicon: 7,
     items.lead: 10,
@@ -129,7 +129,7 @@ underflow_duct = LayeredBlock("Underflow Duct", duct_category, 1, {
     RotatedLayer("@-top")
 ])
 
-duct_bridge = DuctBridge("Duct Bridge", duct_category, 1, {
+duct_bridge = DirectionalBridge("Duct Bridge", duct_category, 1, {
     items.graphite: 20,
     items.metaglass: 8
 }, max_range=4, layers=[Layer(), RotatedLayer("@-dir")])

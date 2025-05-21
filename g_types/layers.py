@@ -117,6 +117,18 @@ class TeamLayer(Layer):
                 tinted.putpixel((x, y), tint_color)
         return tinted
 
+class TintedLayer(Layer):
+    def __init__(self, layer: LayerLike, color: tuple[int, int, int] | int) -> None:
+        super().__init__(layer)
+        if isinstance(color, int):
+            color = parse_color(color)
+            self.color = color
+
+    def render(self, schematic: "g_types.schematic.Schematic", tile: Tile) -> Image.Image:
+        img = Layer.convert(self.layer, schematic, tile)
+        return tint_image(img, self.color)
+
+
 class ConveyorLayer(Layer):
     def __init__(self, layer: LayerLike = "@-#-0", strict: bool = False) -> None:
         super().__init__(layer)

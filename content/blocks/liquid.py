@@ -1,111 +1,127 @@
 from g_types.block import Block, BlockOutput, BlockOutputDirection
-from .block_types import Pump
+from g_types.layers import LayeredBlock, ConveyorLayer, TintedLayer, Layer, RotatedLayer
+from .block_types import Conduit, Bridge, DirectionalBridge
 from .. import items
 
 category = "liquid"
 conduit_category = f"{category}/conduits"
 
-mechanical_pump = Pump("Mechanical Pump", 1, {
+mechanical_pump = LayeredBlock("Mechanical Pump", category, 1, {
     items.copper: 15,
     items.metaglass: 10
-})
+}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL)
 
-rotary_pump = Pump("Rotary Pump", 2, {
+rotary_pump = LayeredBlock("Rotary Pump", category,2, {
     items.copper: 70,
     items.metaglass: 50,
     items.silicon: 20,
     items.titanium: 35
-}, power_consumption=0.3)
+}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL, power_consumption=0.3)
 
-impulse_pump = Pump("Impulse Pump", 3, {
+impulse_pump = LayeredBlock("Impulse Pump", category, 3, {
     items.copper: 80,
     items.metaglass: 90,
     items.silicon: 30,
     items.titanium: 40,
     items.thorium: 35
-}, power_consumption=1.3)
+}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL, power_consumption=1.3)
 
-reinforced_pump = Pump("Reinforced Pump", 2, {
+reinforced_pump = LayeredBlock("Reinforced Pump", category, 2, {
     items.beryllium: 40,
     items.tungsten: 30,
     items.silicon: 20
-})
+}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL)
 
-conduit = Block("Conduit", conduit_category, 1, {
+conduit = Conduit("Conduit", conduit_category, 1, {
     items.metaglass: 1
-}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.FRONT)
+}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.FRONT, layers=[
+    TintedLayer(ConveyorLayer("@-bottom-#"), 0x565656),
+    ConveyorLayer("@-top-#")
+])
 
-pulse_conduit = Block("Pulse Conduit", conduit_category, 1, {
+pulse_conduit = Conduit("Pulse Conduit", conduit_category, 1, {
     items.titanium: 2,
     items.metaglass: 1
-}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.FRONT)
+}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.FRONT, layers=[
+    TintedLayer(ConveyorLayer("@-bottom-#"), 0x565656),
+    ConveyorLayer("@-top-#")
+])
 
-plated_conduit = Block("Plated Conduit", conduit_category, 1, {
+plated_conduit = Conduit("Plated Conduit", conduit_category, 1, {
     items.thorium: 2,
     items.metaglass: 1,
     items.plastanium: 1
-}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.FRONT)
+}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.FRONT, layers=[
+    TintedLayer(ConveyorLayer("@-bottom-#", strict=True), 0x565656),
+    ConveyorLayer("@-top-#", strict=True),
+])
 
-liquid_router = Block("Liquid Router", category, 1, {
+liquid_router = LayeredBlock("Liquid Router", category, 1, {
     items.graphite: 4,
     items.metaglass: 2
-}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL)
+}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL, layers=[Layer("@-bottom"), Layer()])
 
-liquid_container = Block("Liquid Container", category, 2, {
+liquid_container = LayeredBlock("Liquid Container", category, 2, {
     items.titanium: 10,
     items.metaglass: 15
-}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL)
+}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL, layers=[Layer("@-bottom"), Layer()])
 
-liquid_tank = Block("Liquid Tank", category, 3, {
+liquid_tank = LayeredBlock("Liquid Tank", category, 3, {
     items.titanium: 30,
     items.metaglass: 40
-}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL)
+}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL, layers=[Layer("@-bottom"), Layer()])
 
-liquid_junction = Block("Liquid Junction", category, 1, {
+liquid_junction = LayeredBlock("Liquid Junction", category, 1, {
     items.graphite: 2,
     items.metaglass: 2
-}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL)
+}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL, layers=[Layer("@-bottom"), Layer()])
 
-bridge_conduit = Block("Bridge Conduit", category, 1, {
+bridge_conduit = Bridge("Bridge Conduit", category, 1, {
     items.graphite: 4,
     items.metaglass: 8
 }, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL)
 
-phase_conduit = Block("Phase Conduit", category, 1, {
+phase_conduit = Bridge("Phase Conduit", category, 1, {
     items.phase_fabric: 5,
     items.silicon: 7,
     items.metaglass: 20,
     items.titanium: 10
 }, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL, power_consumption=0.3)
 
-reinforced_conduit = Block("Reinforced Conduit", conduit_category, 1, {
+reinforced_conduit = Conduit("Reinforced Conduit", conduit_category, 1, {
     items.beryllium: 2
-}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.FRONT)
-
-reinforced_liquid_junction = Block("Reinforced Liquid Junction", category, 1, {
+}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.FRONT, layers=[
+    TintedLayer(ConveyorLayer("@-bottom-#", strict=True), 0x38393f),
+    ConveyorLayer("@-top-#", strict=True),
+])
+reinforced_liquid_junction = LayeredBlock("Reinforced Liquid Junction", category, 1, {
     items.graphite: 4,
     items.beryllium: 8
 }, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL)
 
-reinforced_bridge_conduit = Block("Reinforced Bridge Conduit", category, 1, {
+reinforced_bridge_conduit = DirectionalBridge("Reinforced Bridge Conduit", category, 1, {
     items.graphite: 8,
     items.beryllium: 20
-}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.FRONT)
+}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL, max_range=4, layers=[
+    Layer("@-bottom"),
+    Layer(),
+    RotatedLayer("@-dir"),
+])
 
-reinforced_liquid_router = Block("Reinforced Liquid Router", category, 1, {
+reinforced_liquid_router = LayeredBlock("Reinforced Liquid Router", category, 1, {
     items.graphite: 8,
     items.beryllium: 4
-}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL)
+}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL, layers=[Layer("@-bottom"), Layer()])
 
-reinforced_liquid_container = Block("Reinforced Liquid Container", category, 2, {
+reinforced_liquid_container = LayeredBlock("Reinforced Liquid Container", category, 2, {
     items.tungsten: 10,
     items.beryllium: 16
-}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL)
+}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL, layers=[Layer("@-bottom"), Layer()])
 
-reinforced_liquid_tank = Block("Reinforced Liquid Tank", category, 3, {
+reinforced_liquid_tank = LayeredBlock("Reinforced Liquid Tank", category, 3, {
     items.tungsten: 40,
     items.beryllium: 50
-}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL)
+}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL, layers=[Layer("@-bottom"), Layer()])
 
 all_blocks = [
     mechanical_pump, rotary_pump, impulse_pump, reinforced_pump,
