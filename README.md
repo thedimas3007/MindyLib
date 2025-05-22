@@ -26,6 +26,7 @@ Python-based parser for Mindustry schematics and maps. WIP
   * [ ] Implement seamless conveyors for payload
   * [ ] Conveyors for rounded blocks
   * [ ] Arrows and ends on bridges
+  * [ ] Dynamic inputs for `payload mass drivers` and `deconstructors`
 
 * **Rendering implementation progress**
   * [x] Campaign
@@ -36,7 +37,7 @@ Python-based parser for Mindustry schematics and maps. WIP
   * [x] Experiment
   * [x] Liquid
   * [x] Logic
-  * [ ] Payload
+  * [x] Payload
   * [ ] Power
   * [ ] Production
   * [ ] Sandbox

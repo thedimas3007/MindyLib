@@ -1,3 +1,6 @@
+from os.path import exists
+from PIL import Image
+
 from g_types.block import Block, BlockOutput, BlockOutputDirection
 from g_types.layers import LayeredBlock, Layer
 
@@ -25,14 +28,6 @@ class Conduit(LayeredBlock):
 
 # region Old types
 #### SHOULD BE REMOVED ####
-class PayloadBlock(Block):
-    def __init__(self, name, size, cost, output=BlockOutput.NONE, output_direction=BlockOutputDirection.NONE, power_consumption=0.0):
-        super().__init__(name, "payload", size, cost, output, output_direction, power_consumption)
-
-class Factory(Block):
-    def __init__(self, name, size, cost, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, power_consumption=0.0):
-        super().__init__(name, "units", size, cost, output, output_direction, power_consumption)
-
 class PowerBlock(Block):
     def __init__(self, name, size, cost, output=BlockOutput.NONE, output_direction=BlockOutputDirection.NONE, power_consumption=0.0):
         super().__init__(name, "power", size, cost, output, output_direction, power_consumption)

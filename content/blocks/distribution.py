@@ -86,7 +86,7 @@ mass_driver = LayeredBlock("Mass Driver", distribution, 3, {
     items.thorium: 50
 }, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=1.75, layers=[
     Layer("@-base"),
-    OutlinedLayer("@", 0x3f3f3f, 3)
+    OutlinedLayer("@", 0x404049, 3)
 ])
 
 duct = Conveyor("Duct", duct_category, 1, {

@@ -1,7 +1,7 @@
 import math
 
 from g_types.block import Block, BlockOutput, BlockOutputDirection
-from .block_types import PayloadBlock, PowerGenerator, PowerBlock
+from .block_types import PowerGenerator, PowerBlock
 
 sandbox_category = "sandbox"
 power_category = "power"
@@ -17,8 +17,8 @@ item_void = Block("Item Void", distribution_category, 1, {})
 liquid_source = Block("Liquid Source", distribution_category, 1, {}, output=BlockOutput.LIQUID, output_direction=BlockOutputDirection.ALL)
 liquid_void = Block("Liquid Void", distribution_category, 1, {})
 
-payload_source = PayloadBlock("Payload Source", 5, {})
-payload_void = PayloadBlock("Payload Void", 5, {}, output=BlockOutput.NONE, output_direction=BlockOutputDirection.NONE)
+payload_source = Block("Payload Source", payload_category, 5, {})
+payload_void = Block("Payload Void", payload_category, 5, {}, output=BlockOutput.NONE, output_direction=BlockOutputDirection.NONE)
 
 heat_source = Block("Heat Source", sandbox_category, 1, {})
 

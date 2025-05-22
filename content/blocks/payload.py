@@ -1,234 +1,277 @@
 from g_types.block import Block, BlockOutput, BlockOutputDirection
-from .block_types import Factory, PayloadBlock
+from g_types.layers import Layer, RotatedLayer, LayeredBlock, OutlinedLayer
 from .. import items
 
-unit_category = "unit"
+unit_category = "units"
 payload_category = "payload"
 
-command_center = Block("Command Center", unit_category, 2, {
-    items.copper: 200,
-    items.lead: 250,
-    items.silicon: 250,
-    items.graphite: 100,
-})
+def _factory_layers(dark: bool, inputs: bool, outputs: bool, top_side: bool, usual_top: bool, size: int):
+    layers = [Layer()]
+    if outputs:
+        layers.append(RotatedLayer(("payload", f"factory-out-{size}{'-dark' if dark else ''}")))
+    if inputs:
+        layers.append(RotatedLayer(("payload", f"factory-in-{size}{'-dark' if dark else ''}")))
+    if top_side:
+        layers.append(RotatedLayer("@-side1", "@-side2"))
 
-ground_factory = Factory("Ground Factory", 3, {
+    if usual_top:
+        layers.append(Layer(("payload", f"factory-top-{size}")))
+    else:
+        layers.append(Layer("@-top"))
+
+    return layers
+
+_factory = _factory_layers(False, False, True, False, True, 3)
+_reconstructor = lambda s: _factory_layers(False, True, True, False, False, s)
+_fabricator = _factory_layers(True, False, True, False, False, 3)
+_refabricator = _factory_layers(True, True, True, False, False, 3)
+_assembler = _factory_layers(True, False, False, True, False, 5)
+
+ground_factory = LayeredBlock("Ground Factory", unit_category, 3, {
     items.copper: 50,
     items.lead: 120,
     items.silicon: 80,
-}, power_consumption=1.2)
+}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, power_consumption=1.2, layers=_factory)
 
-air_factory = Factory("Air Factory", 3, {
+air_factory = LayeredBlock("Air Factory", unit_category, 3, {
     items.copper: 60,
     items.lead: 70,
-}, power_consumption=1.2)
+}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, power_consumption=1.2, layers=_factory)
 
-naval_factory = Factory("Naval Factory", 3, {
+naval_factory = LayeredBlock("Naval Factory", unit_category, 3, {
     items.copper: 150,
     items.lead: 130,
     items.metaglass: 120,
-}, power_consumption=1.2)
+}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, power_consumption=1.2, layers=_factory)
 
-additive_reconstructor = Factory("Additive Reconstructor", 3, {
+additive_reconstructor = LayeredBlock("Additive Reconstructor", unit_category, 3, {
     items.copper: 200,
     items.lead: 120,
     items.silicon: 90,
-}, power_consumption=3.0)
+}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, power_consumption=3.0, layers=_reconstructor(3))
 
-multiplicative_reconstructor = Factory("Multiplicative Reconstructor", 5, {
+multiplicative_reconstructor = LayeredBlock("Multiplicative Reconstructor", unit_category, 5, {
     items.lead: 650,
     items.silicon: 450,
     items.titanium: 350,
     items.thorium: 650,
-}, power_consumption=6.0)
+}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, power_consumption=6.0, layers=_reconstructor(5))
 
-exponential_reconstructor = Factory("Exponential Reconstructor", 7, {
+exponential_reconstructor = LayeredBlock("Exponential Reconstructor", unit_category, 7, {
     items.lead: 2000,
     items.silicon: 1000,
     items.titanium: 2000,
     items.thorium: 750,
     items.plastanium: 450,
     items.phase_fabric: 600,
-}, power_consumption=13.0)
+}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, power_consumption=13.0, layers=_reconstructor(7))
 
-tetrative_reconstructor = Factory("Tetrative Reconstructor", 9, {
+tetrative_reconstructor = LayeredBlock("Tetrative Reconstructor", unit_category, 9, {
     items.lead: 4000,
     items.silicon: 3000,
     items.thorium: 1000,
     items.plastanium: 600,
     items.phase_fabric: 600,
     items.surge_alloy: 800,
-}, power_consumption=25.0)
+}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, power_consumption=25.0, layers=_reconstructor(9))
 
-repair_point = Block("Repair Point", unit_category, 1, {
+repair_point = LayeredBlock("Repair Point", unit_category, 1, {
     items.lead: 30,
     items.copper: 30,
     items.silicon: 20,
-})
+}, layers=[Layer("@-base"), OutlinedLayer("@", 0x404049, 3)])
 
-repair_turret = Block("Repair Turret", "turrets", 2, {
+repair_turret = LayeredBlock("Repair Turret", unit_category, 2, {
     items.silicon: 90,
     items.thorium: 80,
     items.plastanium: 60,
-})
+}, layers=[Layer(("turrets/bases", "block-2")), OutlinedLayer("@", 0x404049, 3)])
 
-resupply_point = Block("Resupply Point", unit_category, 2, {
-    items.lead: 20,
-    items.copper: 15,
-    items.silicon: 15,
-})
-
-tank_fabricator = Factory("Tank Fabricator", 3, {
+tank_fabricator = LayeredBlock("Tank Fabricator", unit_category, 3, {
     items.silicon: 200,
     items.beryllium: 150,
-}, power_consumption=2)
+}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, power_consumption=2, layers=_fabricator)
 
-ship_fabricator = Factory("Ship Fabricator", 3, {
+ship_fabricator = LayeredBlock("Ship Fabricator", unit_category, 3, {
     items.silicon: 250,
     items.beryllium: 200,
-}, power_consumption=2)
+}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, power_consumption=2, layers=_fabricator)
 
-mech_fabricator = Factory("Mech Fabricator", 3, {
+mech_fabricator = LayeredBlock("Mech Fabricator", unit_category, 3, {
     items.silicon: 200,
     items.graphite: 300,
     items.tungsten: 60,
-}, power_consumption=2)
+}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, power_consumption=2, layers=_fabricator)
 
-tank_refabricator = Factory("Tank Refabricator", 3, {
+tank_refabricator = LayeredBlock("Tank Refabricator", unit_category, 3, {
     items.beryllium: 200,
     items.tungsten: 80,
     items.silicon: 100,
-}, power_consumption=3)
+}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, power_consumption=3, layers=_refabricator)
 
-mech_refabricator = Factory("Mech Refabricator", 3, {
+mech_refabricator = LayeredBlock("Mech Refabricator", unit_category, 3, {
     items.beryllium: 250,
     items.tungsten: 120,
     items.silicon: 150,
-}, power_consumption=2.5)
+}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, power_consumption=2.5, layers=_refabricator)
 
-ship_refabricator = Factory("Ship Refabricator", 3, {
+ship_refabricator = LayeredBlock("Ship Refabricator", unit_category, 3, {
     items.beryllium: 200,
     items.tungsten: 100,
     items.silicon: 40,
-}, power_consumption=2.5)
+}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, power_consumption=2.5, layers=_refabricator)
 
-prime_refabricator = Factory("Prime Refabricator", 5, {
+prime_refabricator = LayeredBlock("Prime Refabricator", unit_category, 5, {
     items.thorium: 250,
     items.oxide: 200,
     items.tungsten: 200,
     items.silicon: 400,
-}, power_consumption=5)
+}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, power_consumption=5,
+   layers=_factory_layers(True, True, True, False, False, 5))
 
-tank_assembler = Factory("Tank Assembler", 5, {
+tank_assembler = LayeredBlock("Tank Assembler", unit_category, 5, {
     items.thorium: 500,
     items.oxide: 150,
     items.carbide: 80,
     items.silicon: 500,
-}, power_consumption=3)
+}, power_consumption=3, layers=_assembler)
 
-ship_assembler = Factory("Ship Assembler", 5, {
+ship_assembler = LayeredBlock("Ship Assembler", unit_category, 5, {
     items.carbide: 100,
     items.oxide: 200,
     items.tungsten: 500,
     items.silicon: 800,
     items.thorium: 400,
-}, power_consumption=3)
+}, power_consumption=3, layers=_assembler)
 
-mech_assembler = Factory("Mech Assembler", 5, {
+mech_assembler = LayeredBlock("Mech Assembler", unit_category, 5, {
     items.carbide: 200,
     items.thorium: 600,
     items.oxide: 200,
     items.tungsten: 500,
     items.silicon: 900,
-}, power_consumption=3)
+}, power_consumption=3, layers=_assembler)
 
-basic_assembler_module = Block("Basic Assembler Module", unit_category, 5, {
+basic_assembler_module = LayeredBlock("Basic Assembler Module", unit_category, 5, {
     items.carbide: 300,
     items.thorium: 500,
     items.oxide: 200,
     items.phase_fabric: 400,
-}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, power_consumption=4)
+}, power_consumption=4, layers=[Layer(), RotatedLayer("@-side1", "@-side2")])
 
-unit_repair_tower = Block("Unit Repair Tower", unit_category, 2, {
+unit_repair_tower = LayeredBlock("Unit Repair Tower", unit_category, 2, {
     items.graphite: 90,
     items.silicon: 90,
     items.tungsten: 80,
 }, power_consumption=1)
 
-payload_conveyor = PayloadBlock("Payload Conveyor", 3, {
+payload_conveyor = LayeredBlock("Payload Conveyor", payload_category, 3, {
     items.graphite: 10,
     items.copper: 20
-}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT)
+}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, layers=[RotatedLayer("@-icon")])
 
-payload_router = PayloadBlock("Payload Router", 3, {
+payload_router = LayeredBlock("Payload Router", payload_category, 3, {
     items.graphite: 15,
     items.copper: 20
-}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.ALL)
+}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.ALL, layers=[RotatedLayer("@-icon")])
 
-reinforced_payload_conveyor = PayloadBlock("Reinforced Payload Conveyor", 3, {
+reinforced_payload_conveyor = LayeredBlock("Reinforced Payload Conveyor", payload_category, 3, {
     items.tungsten: 10
-}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT)
+}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, layers=[RotatedLayer("@-icon")])
 
-reinforced_payload_router = PayloadBlock("Reinforced Payload Router", 3, {
+reinforced_payload_router = LayeredBlock("Reinforced Payload Router", payload_category, 3, {
     items.tungsten: 15
-}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.ALL)
+}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.ALL, layers=[RotatedLayer("@-icon")])
 
-payload_mass_driver = PayloadBlock("Payload Mass Driver", 3, {
+payload_mass_driver = LayeredBlock("Payload Mass Driver", payload_category, 3, {
     items.tungsten: 120,
     items.silicon: 120,
     items.graphite: 50
-}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, power_consumption=0.5)
+}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, power_consumption=0.5, layers=[
+    Layer("@-base"),
+    Layer("@-top"),
+    RotatedLayer("factory-out-3-dark"),
+    OutlinedLayer("@", 0x404049, 3),
+])
 
-large_payload_mass_driver = PayloadBlock("Large Payload Mass Driver", 5, {
+large_payload_mass_driver = LayeredBlock("Large Payload Mass Driver", payload_category, 5, {
     items.thorium: 200,
     items.tungsten: 200,
     items.silicon: 200,
     items.graphite: 100,
     items.oxide: 30
-}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, power_consumption=3 )
+}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, power_consumption=3, layers=[
+    Layer("@-base"),
+    Layer("@-top"),
+    RotatedLayer("factory-out-5-dark"),
+    OutlinedLayer("@", 0x404049, 3),
+])
 
-small_deconstructor = PayloadBlock("Small Deconstructor", 3, {
+small_deconstructor = LayeredBlock("Small Deconstructor", payload_category, 3, {
     items.beryllium: 100,
     items.silicon: 100,
     items.oxide: 40,
     items.graphite: 80
-}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=1)
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=1, layers=[
+    Layer(),
+    Layer("@-top"),
+])
 
-deconstructor = PayloadBlock("Deconstructor", 5, {
+deconstructor = LayeredBlock("Deconstructor", payload_category,  5, {
     items.beryllium: 250,
     items.oxide: 100,
     items.silicon: 250,
     items.carbide: 250
-}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=3)
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=3, layers=[
+    Layer(),
+    Layer("@-top"),
+])
 
-constructor = PayloadBlock("Constructor", 3, {
+constructor = LayeredBlock("Constructor", payload_category, 3, {
     items.thorium: 100
-}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, power_consumption=2)
+}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, power_consumption=2, layers=[
+    Layer(),
+    RotatedLayer("factory-out-3-dark"),
+    Layer("@-top"),
+])
 
-large_constructor = PayloadBlock("Large Constructor", 5, {
+large_constructor = LayeredBlock("Large Constructor", payload_category, 5, {
     items.silicon: 150,
     items.oxide: 150,
     items.tungsten: 200,
     items.phase_fabric: 40
-}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, power_consumption=2)
+}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, power_consumption=2, layers=[
+    Layer(),
+    RotatedLayer("factory-out-5-dark"),
+    Layer("@-top"),
+])
 
-payload_loader = PayloadBlock("Payload Loader", 3, {
+payload_loader = LayeredBlock("Payload Loader", payload_category, 3, {
     items.graphite: 50,
     items.silicon: 50,
     items.tungsten: 80
-}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, power_consumption=2)
+}, output=BlockOutput.PAYLOAD, output_direction=BlockOutputDirection.FRONT, power_consumption=2, layers=[
+    Layer(),
+    RotatedLayer("factory-out-3-dark"),
+    RotatedLayer("factory-in-3-dark"),
+    Layer("@-top"),
+])
 
-payload_unloader = PayloadBlock("Payload Unloader", 3, {
+payload_unloader = LayeredBlock("Payload Unloader", payload_category, 3, {
     items.graphite: 50,
     items.silicon: 50,
     items.tungsten: 30
-}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=2)
+}, output=BlockOutput.ITEM, output_direction=BlockOutputDirection.ALL, power_consumption=2, layers=[
+    Layer(),
+    RotatedLayer("factory-out-3-dark"),
+    RotatedLayer("factory-in-3-dark"),
+    Layer("@-top"),
+])
 
 all_blocks = [
-    command_center,
     ground_factory, air_factory, naval_factory,
     additive_reconstructor, multiplicative_reconstructor, exponential_reconstructor, tetrative_reconstructor,
-    repair_point, repair_turret, resupply_point,
+    repair_point, repair_turret,
     tank_fabricator, ship_fabricator, mech_fabricator,
     tank_refabricator, mech_refabricator, ship_refabricator, prime_refabricator,
     tank_assembler, ship_assembler, mech_assembler, basic_assembler_module,

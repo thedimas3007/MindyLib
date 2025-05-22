@@ -176,7 +176,6 @@ class Schematic: # Read only for now
             rot = 0 if pos.x != 0 else 90
             pos = Point2(bridge.x + step_x, bridge.y + step_y)
 
-            # TODO: make a function to get sprites
             bridge_img = get_sprite("distribution", f"{bridge.block.id}-bridge")\
                 .rotate(rot)
 
